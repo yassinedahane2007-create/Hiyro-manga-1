@@ -772,20 +772,43 @@ footer{
   flex-wrap:wrap;gap:12px;font-size:0.8rem;color:var(--text3);
 }
 
+/* ===================== MOBILE NAV BUTTON ===================== */
+.mobile-nav-btn{
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  background:none;border:none;color:var(--text3);font-size:0.65rem;
+  padding:4px 12px;border-radius:var(--radius);transition:color .2s;
+  min-width:48px;
+}
+.mobile-nav-btn:hover,.mobile-nav-btn.active{color:var(--accent)}
+.mobile-nav-btn svg{transition:stroke .2s}
+.mobile-nav-btn.active svg{stroke:var(--accent)}
+
 /* ===================== MOBILE ===================== */
 @media(max-width:768px){
   .nav-links{display:none}
+  .nav-search{max-width:160px}
   .manga-detail{grid-template-columns:1fr}
-  .manga-cover-wrap{position:static}
+  .manga-cover-wrap{position:static;display:grid;grid-template-columns:140px 1fr;gap:16px;align-items:start}
+  .manga-cover{margin-bottom:0}
   .browse-layout{grid-template-columns:1fr}
-  .filter-sidebar{position:static}
-  .hero{height:320px}
-  .hero-content{padding:20px}
-  .hero-title{font-size:1.4rem}
+  .filter-sidebar{position:static;margin-bottom:16px}
+  .hero{height:280px}
+  .hero-content{padding:16px}
+  .hero-title{font-size:1.2rem}
   .hero-desc{display:none}
-  .manga-grid{grid-template-columns:repeat(auto-fill,minmax(110px,1fr))}
-  .notif-panel{width:280px}
+  .manga-grid{grid-template-columns:repeat(auto-fill,minmax(105px,1fr));gap:10px}
+  .notif-panel{width:280px;right:0;left:auto}
   .profile-header{flex-direction:column;text-align:center}
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .packages-grid{grid-template-columns:repeat(2,1fr)}
+  #mobile-nav{display:block!important}
+  .main-content{padding-bottom:70px}
+  footer{padding-bottom:80px}
+  .chapter-date{display:none}
+  .data-table td,.data-table th{padding:8px 8px;font-size:0.78rem}
+}
+@media(min-width:769px){
+  #mobile-nav{display:none!important}
 }
 
 /* ===================== COMMENT SECTION ===================== */
@@ -853,9 +876,9 @@ footer{
       </span>
     </div>
     <div class="nav-links">
-      <span class="nav-link" onclick="navigate('home')">الرئيسية</span>
-      <span class="nav-link" onclick="navigate('browse')">تصفح</span>
-      <span class="nav-link" onclick="navigate('search')">بحث</span>
+      <span class="nav-link" data-page="home" onclick="navigate('home')">الرئيسية</span>
+      <span class="nav-link" data-page="browse" onclick="navigate('browse')">تصفح</span>
+      <span class="nav-link" data-page="search" onclick="navigate('search')">بحث</span>
     </div>
     <div class="nav-actions" id="nav-actions">
       <!-- filled by JS -->
@@ -1202,6 +1225,32 @@ footer{
 
 </div><!-- end main-content -->
 
+<!-- =================== MOBILE BOTTOM NAV =================== -->
+<nav id="mobile-nav" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:800;background:rgba(15,15,15,0.97);backdrop-filter:blur(12px);border-top:1px solid var(--border);padding:8px 0 max(8px, env(safe-area-inset-bottom))">
+  <div style="display:flex;justify-content:space-around;align-items:center">
+    <button onclick="navigate('home')" class="mobile-nav-btn" data-page="home">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>الرئيسية</span>
+    </button>
+    <button onclick="navigate('browse')" class="mobile-nav-btn" data-page="browse">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      <span>تصفح</span>
+    </button>
+    <button onclick="navigate('search')" class="mobile-nav-btn" data-page="search">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <span>بحث</span>
+    </button>
+    <button onclick="navigate('points')" class="mobile-nav-btn" data-page="points">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+      <span>نقاط</span>
+    </button>
+    <button id="mobile-profile-btn" onclick="currentUser ? navigate('profile') : navigate('auth')" class="mobile-nav-btn" data-page="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span id="mobile-profile-label">دخول</span>
+    </button>
+  </div>
+</nav>
+
 <!-- =================== FOOTER =================== -->
 <footer>
   <div class="container">
@@ -1329,6 +1378,18 @@ function routeFromHash() {
   navigate(parts[0], parts[1], parts[2], false);
 }
 
+function updateMobileNav(page) {
+  document.querySelectorAll('.mobile-nav-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.page === page);
+  });
+  // تحديث label البروفايل
+  const label = document.getElementById('mobile-profile-label');
+  if (label) label.textContent = currentUser ? 'حسابي' : 'دخول';
+  // إخفاء الـ mobile nav في صفحة القراءة
+  const mobileNav = document.getElementById('mobile-nav');
+  if (mobileNav) mobileNav.style.display = page === 'reader' ? 'none' : '';
+}
+
 function navigate(page, param1, param2, pushHistory = true) {
   if (pushHistory) {
     let hash = page;
@@ -1346,6 +1407,13 @@ function navigate(page, param1, param2, pushHistory = true) {
   }
   // hide reader navbar except on reader
   document.querySelector('.reader-navbar').style.display = page === 'reader' ? 'flex' : 'none';
+  // تحديث active state للـ nav links
+  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+  const activeLink = document.querySelector(`.nav-link[data-page="${page}"]`);
+  if (activeLink) activeLink.classList.add('active');
+  // تحديث mobile nav
+  updateMobileNav(page);
+
   switch(page) {
     case 'home': loadHomePage(); break;
     case 'browse': loadBrowsePage(param1); break;
@@ -1354,30 +1422,54 @@ function navigate(page, param1, param2, pushHistory = true) {
     case 'team': loadTeamPage(param1); break;
     case 'genre': loadGenrePage(param1); break;
     case 'search': loadSearchPage(param1); break;
-    case 'auth': break;
+    case 'auth':
+      // إذا مسجل دخول - لا نريه صفحة الدخول
+      if (currentUser) { navigate('home'); return; }
+      break;
     case 'profile': loadProfilePage(); break;
     case 'points': loadPointsPage(); break;
     case 'become-publisher': loadBecomePublisherPage(); break;
-    case 'publisher': loadPublisherDashboard(); break;
-    case 'admin': loadAdminDashboard(); break;
+    case 'publisher':
+      if (!currentUser) { navigate('auth'); return; }
+      loadPublisherDashboard(); break;
+    case 'admin':
+      if (!currentUser) { navigate('auth'); return; }
+      loadAdminDashboard(); break;
   }
 }
 
 // =================== NAV ACTIONS ===================
 function renderNavActions() {
   const wrap = document.getElementById('nav-actions');
-  if (currentUser && currentUserProfile) {
-    const u = currentUserProfile;
+  if (!wrap) return;
+
+  // لو مسجل دخول - نعرض الواجهة الكاملة
+  if (currentUser) {
+    const u = currentUserProfile || {
+      username: currentUser.email?.split('@')[0] || 'مستخدم',
+      role: 'user',
+      points: 0,
+      avatar_url: null
+    };
     const initials = (u.username || 'U')[0].toUpperCase();
-    let extra = '';
-    if (u.role === 'publisher' || u.role === 'admin') {
-      extra = `<button class="btn btn-ghost btn-sm" onclick="navigate('${u.role === 'admin' ? 'admin' : 'publisher'}')">
-        ${u.role === 'admin' ? 'الإدارة' : 'لوحة الناشر'}
+
+    // أزرار خاصة بالدور
+    let dashboardBtn = '';
+    if (u.role === 'admin') {
+      dashboardBtn = `<button class="btn btn-ghost btn-sm" onclick="navigate('admin')" style="color:var(--accent2);border-color:var(--accent)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        الإدارة
+      </button>`;
+    } else if (u.role === 'publisher') {
+      dashboardBtn = `<button class="btn btn-ghost btn-sm" onclick="navigate('publisher')" style="color:var(--success)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        لوحة الناشر
       </button>`;
     }
+
     wrap.innerHTML = `
-      ${extra}
-      <div class="notif-wrapper">
+      ${dashboardBtn}
+      <div class="notif-wrapper" style="position:relative">
         <button class="btn-icon" onclick="toggleNotifPanel()">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
           <span class="notif-badge" id="notif-count" style="display:none">0</span>
@@ -1387,17 +1479,24 @@ function renderNavActions() {
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
         ${u.points || 0} نقطة
       </button>
-      <button class="btn-icon" onclick="navigate('profile')" title="${u.username}">
-        ${u.avatar_url ? `<img src="${u.avatar_url}" style="width:32px;height:32px;border-radius:50%;object-fit:cover">` : `<span style="font-weight:700;font-size:0.9rem">${initials}</span>`}
+      <button class="btn-icon" onclick="navigate('profile')" title="${u.username}" style="position:relative">
+        ${u.avatar_url
+          ? `<img src="${u.avatar_url}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:2px solid var(--accent)">`
+          : `<div style="width:32px;height:32px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.9rem">${initials}</div>`
+        }
       </button>
     `;
     loadUnreadNotifCount();
   } else {
+    // غير مسجل
     wrap.innerHTML = `
       <button class="btn btn-ghost btn-sm" onclick="navigate('auth')">دخول</button>
       <button class="btn btn-primary btn-sm" onclick="navigate('auth')">إنشاء حساب</button>
     `;
   }
+  // تحديث mobile bottom nav label
+  const mLabel = document.getElementById('mobile-profile-label');
+  if (mLabel) mLabel.textContent = currentUser ? 'حسابي' : 'دخول';
 }
 
 async function loadUserProfile() {
@@ -2235,98 +2334,4 @@ function profileTab(tab) {
 }
 
 async function loadProfileHistory() {
-  const wrap = document.getElementById('profile-history');
-  if (!wrap) return;
-  wrap.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
-  const { data } = await sb.from('reading_history').select('*,manga(title_ar,slug,cover_url),chapters(chapter_number)').eq('user_id', currentUser.id).order('last_read_at', {ascending:false}).limit(20);
-  if (!data?.length) { wrap.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📖</div><p>لم تقرأ أي عمل بعد</p></div>'; return; }
-  wrap.innerHTML = `<div class="manga-grid">${data.map(h => renderMangaCard({...h.manga, views:0, status:'ongoing', publishers:{team_name:''}})).join('')}</div>`;
-}
-
-async function loadProfileBookmarks() {
-  const wrap = document.getElementById('profile-bookmarks');
-  if (!wrap) return;
-  wrap.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
-  const { data } = await sb.from('bookmarks').select('*,manga(*)').eq('user_id', currentUser.id).order('created_at', {ascending:false});
-  if (!data?.length) { wrap.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🔖</div><p>لا توجد مفضلة بعد</p></div>'; return; }
-  wrap.innerHTML = `<div class="manga-grid">${data.map(b => renderMangaCard({...b.manga, publishers:{team_name:''}})).join('')}</div>`;
-}
-
-async function loadProfileTransactions() {
-  const wrap = document.getElementById('profile-transactions');
-  if (!wrap) return;
-  wrap.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
-  const { data } = await sb.from('points_transactions').select('*').eq('user_id', currentUser.id).order('created_at', {ascending:false}).limit(30);
-  if (!data?.length) { wrap.innerHTML = '<div class="empty-state"><div class="empty-state-icon">💳</div><p>لا توجد معاملات</p></div>'; return; }
-  const typeMap = {purchase:'شراء',spend:'إنفاق',earn:'ربح',donate:'تبرع',admin_add:'إضافة مدير'};
-  wrap.innerHTML = `<div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius2);overflow:hidden">
-    ${data.map(t => `
-      <div class="transaction-row">
-        <div class="transaction-desc">
-          <div>${t.description || typeMap[t.type]}</div>
-          <div class="transaction-type">${typeMap[t.type]} — ${new Date(t.created_at).toLocaleDateString('ar')}</div>
-        </div>
-        <div class="transaction-amount ${t.amount > 0 ? 'amount-pos' : 'amount-neg'}">${t.amount > 0 ? '+' : ''}${t.amount} نقطة</div>
-      </div>
-    `).join('')}
-  </div>`;
-}
-
-async function loadProfileTickets() {
-  const wrap = document.getElementById('profile-tickets');
-  if (!wrap) return;
-  wrap.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
-  const { data } = await sb.from('payment_tickets').select('*').eq('user_id', currentUser.id).order('created_at', {ascending:false});
-  if (!data?.length) { wrap.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🎫</div><p>لا توجد طلبات دفع</p></div>'; return; }
-  wrap.innerHTML = `<div class="data-table-wrap"><table class="data-table">
-    <thead><tr><th>المبلغ</th><th>النقاط</th><th>الحالة</th><th>التاريخ</th></tr></thead>
-    <tbody>${data.map(t => `
-      <tr>
-        <td>${t.amount_usd}$</td>
-        <td>${t.points_requested} نقطة</td>
-        <td><span class="status-badge status-${t.status}">${t.status === 'pending' ? 'قيد المراجعة' : t.status === 'approved' ? 'موافق عليه' : 'مرفوض'}</span></td>
-        <td>${new Date(t.created_at).toLocaleDateString('ar')}</td>
-      </tr>
-    `).join('')}</tbody>
-  </table></div>`;
-}
-
-// =================== POINTS PAGE ===================
-async function loadPointsPage() {
-  const grid = document.getElementById('packages-grid');
-  grid.innerHTML = '<div class="loading" style="grid-column:1/-1"><div class="spinner"></div></div>';
-  const { data: pkgs } = await sb.from('coin_packages').select('*').eq('is_active', true).order('sort_order');
-  grid.innerHTML = '';
-  if (pkgs) {
-    pkgs.forEach(pkg => {
-      grid.insertAdjacentHTML('beforeend', `
-        <div class="package-card ${pkg.is_popular ? 'popular' : ''}" onclick="selectPackage('${pkg.id}','${pkg.points}','${pkg.price_usd}','${pkg.name}')">
-          ${pkg.is_popular ? '<div class="package-popular-badge">الأشهر</div>' : ''}
-          <div class="package-points">${pkg.points}</div>
-          <div style="font-size:0.75rem;color:var(--text3);margin-bottom:4px">نقطة</div>
-          ${pkg.bonus_points ? `<div class="package-bonus">+ ${pkg.bonus_points} مكافأة</div>` : '<div style="height:18px"></div>'}
-          <div class="package-price">${pkg.price_usd}$</div>
-          <div class="package-equiv">يعادل ${(pkg.price_usd * 3.7).toFixed(0)} درهم</div>
-        </div>
-      `);
-    });
-  }
-
-  // ticket form
-  const ticketWrap = document.getElementById('ticket-form-wrap');
-  if (!currentUser) {
-    ticketWrap.innerHTML = `<p style="text-align:center;color:var(--text3)"><a onclick="navigate('auth')" style="color:var(--accent);cursor:pointer">سجل دخولك</a> لإرسال طلب الدفع</p>`;
-    return;
-  }
-  ticketWrap.innerHTML = `
-    <div class="form-group">
-      <label class="form-label">الباقة المختارة</label>
-      <input class="form-input" id="ticket-package" placeholder="اختر باقة من الأعلى" readonly>
-    </div>
-    <div class="form-group">
-      <label class="form-label">لقطة شاشة التحويل *</label>
-      <input class="form-input" type="file" id="ticket-screenshot" accept="image/*">
-    </div>
-    <div class="form-group">
-      <label class="form-label">طريقة التواصل المفضلة</label>
-      <inpu
+  const wrap = document.getElementByI
