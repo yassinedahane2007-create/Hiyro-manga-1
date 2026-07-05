@@ -2474,19 +2474,22 @@ async function register() {
   }
   hideLoading();
   if (error) {
+    const raw = (error && (error.message || error.error_description || error.error)) ? String(error.message || error.error_description || error.error) : '';
     let msg = 'حدث خطأ، حاول مرة أخرى';
-    if (error.message) {
-      if (error.message.includes('already registered') || error.message.includes('already been registered')) msg = 'هذا البريد الإلكتروني مسجل مسبقاً';
-      else if (error.message.includes('invalid email') || error.message.includes('Invalid email')) msg = 'البريد الإلكتروني غير صحيح';
-      else if (error.message.includes('Password') || error.message.includes('password')) msg = 'كلمة المرور ضعيفة جداً';
-      else if (error.message.includes('rate limit') || error.message.includes('too many')) msg = 'محاولات كثيرة، انتظر قليلاً';
-      else if (error.message.includes('network') || error.message.includes('fetch')) msg = 'خطأ في الاتصال، تحقق من الإنترنت';
-      else msg = error.message;
-    }
+    if (raw.includes('already') || raw.includes('registered')) msg = 'هذا البريد مسجل مسبقاً، جرب تسجيل الدخول';
+    else if (raw.includes('nvalid') || raw.includes('format')) msg = 'البريد الإلكتروني غير صحيح';
+    else if (raw.includes('assword') || raw.includes('weak') || raw.includes('short')) msg = 'كلمة المرور ضعيفة، استخدم 8 أحرف أو أكثر';
+    else if (raw.includes('rate') || raw.includes('many') || raw.includes('429')) msg = 'محاولات كثيرة، انتظر دقيقة ثم حاول';
+    else if (raw.includes('etch') || raw.includes('network') || raw.includes('onnect')) msg = 'خطأ في الاتصال، تحقق من الإنترنت';
+    else if (raw.includes('onfirm') || raw.includes('erif')) msg = 'تحقق من بريدك الإلكتروني لتأكيد الحساب';
+    else if (raw.length > 0) msg = raw;
     errEl.textContent = msg;
     errEl.classList.remove('hidden');
+  } else {
+    errEl.classList.add('hidden');
+    showToast('تم إنشاء الحساب! يمكنك تسجيل الدخول الآن', 'success');
+    closeModal('modal-auth');
   }
-  else { errEl.classList.add('hidden'); showToast('تم إنشاء الحساب! يمكنك تسجيل الدخول الآن', 'success'); closeModal('modal-auth'); }
 }
 
 async function logout() {
