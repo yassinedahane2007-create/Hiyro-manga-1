@@ -1991,7 +1991,7 @@ tbody tr:hover{background:var(--bg-hover)}
         <label class="form-label">كلمة المرور</label>
         <input type="password" class="form-input" id="login-password" placeholder="••••••••">
       </div>
-      <div id="login-error" class="form-error hidden"></div>
+      <div id="login-error" style="display:none;font-size:12px;color:var(--error);margin-top:4px"></div>
       <button class="btn btn-primary btn-full" onclick="login()" style="margin-top:8px">
         <svg width="16" height="16"><use href="#ico-arrow-left"/></svg> دخول
       </button>
@@ -2009,7 +2009,7 @@ tbody tr:hover{background:var(--bg-hover)}
         <label class="form-label">كلمة المرور</label>
         <input type="password" class="form-input" id="reg-password" placeholder="8 أحرف على الأقل">
       </div>
-      <div id="reg-error" class="form-error hidden"></div>
+      <div id="reg-error" style="display:none;font-size:12px;color:var(--error);margin-top:4px"></div>
       <button class="btn btn-primary btn-full" onclick="register()" style="margin-top:8px">
         <svg width="16" height="16"><use href="#ico-user"/></svg> إنشاء حساب
       </button>
@@ -2449,12 +2449,12 @@ async function login() {
   const email = document.getElementById('login-email').value.trim();
   const pass = document.getElementById('login-password').value;
   const errEl = document.getElementById('login-error');
-  if (!email || !pass) { errEl.textContent = 'يرجى ملء جميع الحقول'; errEl.classList.remove('hidden'); return; }
+  if (!email || !pass) { errEl.textContent = 'يرجى ملء جميع الحقول'; errEl.style.display='block'; return; }
   showLoading('جاري تسجيل الدخول...');
   const { error } = await sb.auth.signInWithPassword({ email, password: pass });
   hideLoading();
   if (error) { errEl.textContent = 'بريد إلكتروني أو كلمة مرور غير صحيحة'; errEl.classList.remove('hidden'); }
-  else errEl.classList.add('hidden');
+  else errEl.style.display='none';
 }
 
 async function register() {
@@ -2462,8 +2462,8 @@ async function register() {
   const email = document.getElementById('reg-email').value.trim();
   const pass = document.getElementById('reg-password').value;
   const errEl = document.getElementById('reg-error');
-  if (!username || !email || !pass) { errEl.textContent = 'يرجى ملء جميع الحقول'; errEl.classList.remove('hidden'); return; }
-  if (pass.length < 8) { errEl.textContent = 'كلمة المرور يجب أن تكون 8 أحرف على الأقل'; errEl.classList.remove('hidden'); return; }
+  if (!username || !email || !pass) { errEl.textContent = 'يرجى ملء جميع الحقول'; errEl.style.display='block'; return; }
+  if (pass.length < 8) { errEl.textContent = 'كلمة المرور يجب أن تكون 8 أحرف على الأقل'; errEl.style.display='block'; return; }
   showLoading('جاري إنشاء الحساب...');
   const { data: signUpData, error } = await sb.auth.signUp({ email, password: pass, options: { data: { username }, emailRedirectTo: null } });
   if (!error && signUpData?.user) {
@@ -2484,9 +2484,9 @@ async function register() {
     else if (raw.includes('onfirm') || raw.includes('erif')) msg = 'تحقق من بريدك الإلكتروني لتأكيد الحساب';
     else if (raw.length > 0) msg = raw;
     errEl.textContent = msg;
-    errEl.classList.remove('hidden');
+    errEl.style.display='block';
   } else {
-    errEl.classList.add('hidden');
+    errEl.style.display='none';
     showToast('تم إنشاء الحساب! يمكنك تسجيل الدخول الآن', 'success');
     closeModal('modal-auth');
   }
@@ -3359,11 +3359,11 @@ async function submitAddManga() {
   if (!currentUser) return;
   const titleAr = document.getElementById('add-manga-title-ar').value.trim();
   const errEl = document.getElementById('add-manga-error');
-  if (!titleAr) { errEl.textContent = 'اسم العمل مطلوب'; errEl.classList.remove('hidden'); return; }
+  if (!titleAr) { errEl.textContent = 'اسم العمل مطلوب'; errEl.style.display='block'; return; }
   const coverFile = document.getElementById('add-manga-cover-input').files[0];
-  if (!coverFile) { errEl.textContent = 'صورة الغلاف مطلوبة'; errEl.classList.remove('hidden'); return; }
+  if (!coverFile) { errEl.textContent = 'صورة الغلاف مطلوبة'; errEl.style.display='block'; return; }
   const { data: pub } = await sb.from('publishers').select('*').eq('user_id', currentUser.id).single();
-  if (!pub) { errEl.textContent = 'لم يتم العثور على حساب الناشر'; errEl.classList.remove('hidden'); return; }
+  if (!pub) { errEl.textContent = 'لم يتم العثور على حساب الناشر'; errEl.style.display='block'; return; }
   showLoading('جاري رفع العمل...');
   const slug = slugify(titleAr) + '-' + Date.now();
   const coverUrl = await uploadToR2(coverFile, `covers/${slug}/cover.${coverFile.name.split('.').pop()}`);
@@ -3378,7 +3378,7 @@ async function submitAddManga() {
     status: document.getElementById('add-manga-status').value,
     approval_status: 'pending'
   }).select().single();
-  if (error) { hideLoading(); errEl.textContent = 'حدث خطأ، حاول مرة أخرى'; errEl.classList.remove('hidden'); return; }
+  if (error) { hideLoading(); errEl.textContent = 'حدث خطأ، حاول مرة أخرى'; errEl.style.display='block'; return; }
   const selectedGenres = [...document.querySelectorAll('#add-manga-genres input:checked')].map(i => i.value);
   if (selectedGenres.length) {
     await sb.from('manga_genres').insert(selectedGenres.map(gId => ({ manga_id: manga.id, genre_id: gId })));
@@ -3456,9 +3456,9 @@ async function submitAddChapter() {
   const mangaId = document.getElementById('add-chapter-manga-id').value;
   const chapterNum = parseFloat(document.getElementById('add-chapter-number').value);
   const errEl = document.getElementById('add-chapter-error');
-  if (!chapterNum && chapterNum !== 0) { errEl.textContent = 'رقم الفصل مطلوب'; errEl.classList.remove('hidden'); return; }
-  if (!uploadedPages.length) { errEl.textContent = 'يرجى رفع صفحات الفصل'; errEl.classList.remove('hidden'); return; }
-  errEl.classList.add('hidden');
+  if (!chapterNum && chapterNum !== 0) { errEl.textContent = 'رقم الفصل مطلوب'; errEl.style.display='block'; return; }
+  if (!uploadedPages.length) { errEl.textContent = 'يرجى رفع صفحات الفصل'; errEl.style.display='block'; return; }
+  errEl.style.display='none';
   const accessType = document.getElementById('add-chapter-access').value;
   const pointsCost = accessType === 'points' ? parseInt(document.getElementById('add-chapter-points').value) : null;
   const monetagLinks = accessType === 'monetag' ? document.getElementById('add-chapter-monetag').value.split('\n').map(l=>l.trim()).filter(Boolean) : null;
@@ -3475,7 +3475,7 @@ async function submitAddChapter() {
     monetag_links: monetagLinks,
     pages_count: uploadedPages.length
   }).select().single();
-  if (error) { submitBtn.disabled = false; document.getElementById('chapter-upload-progress').style.display = 'none'; errEl.textContent = 'حدث خطأ: ' + error.message; errEl.classList.remove('hidden'); return; }
+  if (error) { submitBtn.disabled = false; document.getElementById('chapter-upload-progress').style.display = 'none'; errEl.textContent = 'حدث خطأ: ' + error.message; errEl.style.display='block'; return; }
   const bar = document.getElementById('chapter-upload-bar');
   const status = document.getElementById('chapter-upload-status');
   const pages = [];
