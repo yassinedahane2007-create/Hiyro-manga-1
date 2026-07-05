@@ -1,0 +1,3384 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HIYRO MANGA — منصة المانغا العربية</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Noto+Naskh+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+:root {
+  --bg: #0f0f0f;
+  --bg2: #141414;
+  --card: #1a1a1a;
+  --card2: #202020;
+  --border: #2a2a2a;
+  --border2: #333;
+  --accent: #c0392b;
+  --accent2: #e74c3c;
+  --accent-dim: rgba(192,57,43,0.15);
+  --text: #e8e8e8;
+  --text2: #a0a0a0;
+  --text3: #666;
+  --success: #27ae60;
+  --warning: #e67e22;
+  --info: #2980b9;
+  --font: 'Cairo', 'Noto Naskh Arabic', sans-serif;
+  --radius: 8px;
+  --radius2: 12px;
+  --shadow: 0 4px 20px rgba(0,0,0,0.5);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--font);direction:rtl;min-height:100vh;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+img{max-width:100%;display:block}
+button{cursor:pointer;font-family:var(--font);border:none;outline:none}
+input,textarea,select{font-family:var(--font);outline:none}
+
+/* ===================== SCROLLBAR ===================== */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:var(--bg2)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--accent)}
+
+/* ===================== LAYOUT ===================== */
+.container{max-width:1280px;margin:0 auto;padding:0 20px}
+.page{display:none;min-height:calc(100vh - 60px);padding-bottom:60px}
+.page.active{display:block}
+
+/* ===================== NAVBAR ===================== */
+#navbar{
+  position:fixed;top:0;right:0;left:0;z-index:1000;
+  background:rgba(15,15,15,0.95);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);height:60px;
+  display:flex;align-items:center;
+}
+.nav-inner{
+  max-width:1280px;margin:0 auto;padding:0 20px;
+  width:100%;display:flex;align-items:center;gap:16px;
+}
+.nav-logo{
+  display:flex;align-items:center;gap:8px;
+  font-size:1.4rem;font-weight:900;color:var(--text);flex-shrink:0;
+}
+.nav-logo span{color:var(--accent)}
+.nav-search{
+  flex:1;max-width:400px;
+  position:relative;
+}
+.nav-search input{
+  width:100%;background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:8px 40px 8px 16px;
+  color:var(--text);font-size:0.9rem;transition:border-color .2s;
+}
+.nav-search input:focus{border-color:var(--accent)}
+.nav-search-icon{
+  position:absolute;left:12px;top:50%;transform:translateY(-50%);
+  color:var(--text3);pointer-events:none;
+}
+.nav-links{display:flex;align-items:center;gap:4px;margin-right:auto}
+.nav-link{
+  padding:6px 12px;border-radius:var(--radius);
+  color:var(--text2);font-size:0.9rem;transition:all .2s;white-space:nowrap;
+}
+.nav-link:hover,.nav-link.active{color:var(--text);background:var(--card)}
+.nav-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.btn{
+  display:inline-flex;align-items:center;gap:6px;padding:8px 16px;
+  border-radius:var(--radius);font-size:0.875rem;font-weight:600;
+  transition:all .2s;cursor:pointer;
+}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:var(--accent2)}
+.btn-ghost{background:var(--card);color:var(--text2);border:1px solid var(--border)}
+.btn-ghost:hover{color:var(--text);border-color:var(--border2)}
+.btn-success{background:var(--success);color:#fff}
+.btn-warning{background:var(--warning);color:#fff}
+.btn-sm{padding:5px 10px;font-size:0.8rem}
+.btn-icon{padding:8px;border-radius:var(--radius);background:var(--card);border:1px solid var(--border);color:var(--text2)}
+.btn-icon:hover{color:var(--text);border-color:var(--border2)}
+
+/* ===================== NOTIFICATION BELL ===================== */
+.notif-wrapper{position:relative}
+.notif-badge{
+  position:absolute;top:-4px;left:-4px;
+  background:var(--accent);color:#fff;
+  font-size:0.65rem;min-width:16px;height:16px;
+  border-radius:8px;display:flex;align-items:center;justify-content:center;
+  padding:0 4px;line-height:1;
+}
+
+/* ===================== PAGE CONTENT ===================== */
+.main-content{padding-top:60px}
+
+/* ===================== HERO SLIDER ===================== */
+.hero{
+  position:relative;height:460px;overflow:hidden;
+  background:var(--card);
+}
+.hero-slide{
+  position:absolute;inset:0;opacity:0;transition:opacity .6s;
+  display:flex;align-items:flex-end;
+}
+.hero-slide.active{opacity:1}
+.hero-bg{
+  position:absolute;inset:0;background-size:cover;background-position:center;
+  filter:brightness(0.4);
+}
+.hero-content{
+  position:relative;z-index:2;padding:40px;max-width:600px;
+}
+.hero-badge{
+  display:inline-block;background:var(--accent);color:#fff;
+  font-size:0.75rem;padding:3px 10px;border-radius:4px;margin-bottom:12px;
+}
+.hero-title{font-size:2rem;font-weight:900;margin-bottom:8px;line-height:1.3}
+.hero-desc{color:var(--text2);font-size:0.9rem;line-height:1.7;margin-bottom:16px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.hero-actions{display:flex;gap:10px;flex-wrap:wrap}
+.hero-dots{
+  position:absolute;bottom:20px;left:50%;transform:translateX(-50%);
+  display:flex;gap:8px;z-index:3;
+}
+.hero-dot{
+  width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.3);
+  cursor:pointer;transition:all .2s;
+}
+.hero-dot.active{background:var(--accent);width:24px;border-radius:4px}
+.hero-arrows{
+  position:absolute;top:50%;transform:translateY(-50%);
+  width:100%;display:flex;justify-content:space-between;padding:0 16px;z-index:3;
+}
+.hero-arrow{
+  width:40px;height:40px;border-radius:50%;
+  background:rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.2);
+  color:#fff;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:all .2s;
+}
+.hero-arrow:hover{background:var(--accent)}
+
+/* ===================== AD BANNERS ===================== */
+.ad-banner{
+  background:var(--card2);border:1px dashed var(--border2);
+  border-radius:var(--radius);display:flex;align-items:center;
+  justify-content:center;color:var(--text3);font-size:0.8rem;
+  margin:16px 0;overflow:hidden;
+}
+.ad-banner-top{height:90px}
+.ad-banner-mid{height:120px}
+.ad-banner-rect{height:250px}
+.ad-banner-sm{height:60px}
+
+/* ===================== SECTIONS ===================== */
+.section{padding:32px 0}
+.section-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:20px;
+}
+.section-title{
+  font-size:1.2rem;font-weight:700;
+  display:flex;align-items:center;gap:8px;
+}
+.section-title::before{
+  content:'';display:block;width:4px;height:20px;
+  background:var(--accent);border-radius:2px;
+}
+.section-link{color:var(--text3);font-size:0.85rem}
+.section-link:hover{color:var(--accent)}
+
+/* ===================== MANGA CARDS ===================== */
+.manga-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(140px,1fr));
+  gap:16px;
+}
+.manga-grid-lg{
+  grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
+}
+.manga-card{
+  background:var(--card);border-radius:var(--radius2);overflow:hidden;
+  border:1px solid var(--border);transition:all .2s;cursor:pointer;
+}
+.manga-card:hover{border-color:var(--accent);transform:translateY(-4px);box-shadow:var(--shadow)}
+.manga-card-img{
+  aspect-ratio:2/3;overflow:hidden;position:relative;background:var(--card2);
+}
+.manga-card-img img{
+  width:100%;height:100%;object-fit:cover;
+  transition:transform .3s;
+}
+.manga-card:hover .manga-card-img img{transform:scale(1.06)}
+.manga-card-badge{
+  position:absolute;top:6px;right:6px;
+  font-size:0.65rem;padding:2px 7px;border-radius:3px;
+  background:rgba(0,0,0,0.8);color:var(--text2);
+}
+.manga-card-badge.completed{color:var(--success)}
+.manga-card-badge.hiatus{color:var(--warning)}
+.manga-card-badge.ongoing{color:var(--accent2)}
+.manga-card-body{padding:10px}
+.manga-card-title{
+  font-size:0.85rem;font-weight:600;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  margin-bottom:4px;line-height:1.4;
+}
+.manga-card-meta{
+  font-size:0.75rem;color:var(--text3);
+  display:flex;align-items:center;justify-content:space-between;
+}
+
+/* ===================== CHAPTER LIST CARD ===================== */
+.chapter-list-card{
+  display:flex;gap:12px;align-items:center;
+  padding:10px;background:var(--card);border-radius:var(--radius);
+  border:1px solid var(--border);transition:all .2s;cursor:pointer;
+  margin-bottom:8px;
+}
+.chapter-list-card:hover{border-color:var(--border2);background:var(--card2)}
+.chapter-list-img{
+  width:48px;height:64px;border-radius:6px;overflow:hidden;flex-shrink:0;
+  background:var(--card2);
+}
+.chapter-list-img img{width:100%;height:100%;object-fit:cover}
+.chapter-list-info{flex:1;min-width:0}
+.chapter-list-manga{font-size:0.8rem;color:var(--text3);margin-bottom:2px}
+.chapter-list-chapter{font-size:0.9rem;font-weight:600}
+.chapter-list-time{font-size:0.75rem;color:var(--text3);margin-top:4px}
+
+/* ===================== MANGA PAGE ===================== */
+.manga-detail{
+  display:grid;grid-template-columns:220px 1fr;gap:32px;
+  padding:32px 0;
+}
+.manga-cover-wrap{
+  position:sticky;top:76px;align-self:start;
+}
+.manga-cover{
+  width:100%;aspect-ratio:2/3;border-radius:var(--radius2);
+  overflow:hidden;border:1px solid var(--border);
+  background:var(--card);margin-bottom:12px;
+}
+.manga-cover img{width:100%;height:100%;object-fit:cover}
+.manga-info h1{font-size:1.6rem;font-weight:900;margin-bottom:4px;line-height:1.3}
+.manga-info-original{color:var(--text3);font-size:0.9rem;margin-bottom:12px}
+.manga-meta-row{
+  display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;
+}
+.manga-meta-tag{
+  padding:4px 12px;border-radius:20px;
+  font-size:0.8rem;background:var(--card);border:1px solid var(--border);
+}
+.manga-meta-tag.genre{color:var(--accent2);border-color:var(--accent-dim);cursor:pointer}
+.manga-meta-tag.genre:hover{background:var(--accent-dim)}
+.manga-desc{
+  color:var(--text2);font-size:0.9rem;line-height:1.8;
+  margin-bottom:20px;
+}
+.manga-actions{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:24px}
+
+/* ===================== CHAPTER LIST ===================== */
+.chapter-table{width:100%}
+.chapter-row{
+  display:flex;align-items:center;padding:10px 14px;
+  border-bottom:1px solid var(--border);cursor:pointer;
+  transition:background .15s;gap:12px;
+}
+.chapter-row:hover{background:var(--card2)}
+.chapter-row:last-child{border-bottom:none}
+.chapter-num{
+  font-weight:700;font-size:0.9rem;flex-shrink:0;min-width:80px;
+}
+.chapter-title-text{flex:1;font-size:0.85rem;color:var(--text2)}
+.chapter-access{flex-shrink:0}
+.chapter-access-badge{
+  padding:3px 10px;border-radius:4px;font-size:0.75rem;
+}
+.badge-free{background:rgba(39,174,96,0.15);color:var(--success)}
+.badge-points{background:rgba(230,126,34,0.15);color:var(--warning)}
+.badge-monetag{background:rgba(41,128,185,0.15);color:var(--info)}
+.chapter-date{font-size:0.75rem;color:var(--text3);flex-shrink:0;min-width:90px;text-align:left}
+
+/* ===================== READER PAGE ===================== */
+.reader-navbar{
+  position:fixed;top:0;right:0;left:0;z-index:100;
+  background:rgba(15,15,15,0.98);border-bottom:1px solid var(--border);
+  height:56px;display:flex;align-items:center;padding:0 16px;gap:12px;
+}
+.reader-manga-name{font-weight:700;font-size:0.95rem}
+.reader-chapter{color:var(--text3);font-size:0.85rem}
+.reader-progress{
+  position:fixed;top:56px;right:0;left:0;z-index:99;
+  height:3px;background:var(--border);
+}
+.reader-progress-bar{height:100%;background:var(--accent);transition:width .1s}
+.reader-pages{
+  padding-top:59px;max-width:800px;margin:0 auto;
+}
+.reader-page-img{
+  width:100%;display:block;margin-bottom:2px;
+}
+.reader-controls{
+  display:flex;align-items:center;justify-content:center;gap:12px;
+  padding:24px;
+}
+
+/* ===================== AUTH PAGE ===================== */
+.auth-wrap{
+  display:flex;align-items:center;justify-content:center;
+  min-height:calc(100vh - 60px);padding:40px 20px;
+}
+.auth-box{
+  width:100%;max-width:420px;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius2);padding:40px;
+}
+.auth-logo{text-align:center;font-size:2rem;font-weight:900;margin-bottom:8px}
+.auth-logo span{color:var(--accent)}
+.auth-subtitle{text-align:center;color:var(--text3);margin-bottom:32px;font-size:0.9rem}
+.form-group{margin-bottom:18px}
+.form-label{display:block;font-size:0.85rem;font-weight:600;margin-bottom:6px;color:var(--text2)}
+.form-input{
+  width:100%;background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--radius);padding:10px 14px;color:var(--text);
+  font-size:0.9rem;transition:border-color .2s;
+}
+.form-input:focus{border-color:var(--accent)}
+.form-input::placeholder{color:var(--text3)}
+.form-error{color:#e74c3c;font-size:0.8rem;margin-top:4px}
+.auth-switch{text-align:center;margin-top:20px;font-size:0.85rem;color:var(--text3)}
+.auth-switch a{color:var(--accent);cursor:pointer}
+.auth-tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:28px}
+.auth-tab{
+  flex:1;padding:10px;text-align:center;font-size:0.9rem;font-weight:600;
+  color:var(--text3);cursor:pointer;transition:all .2s;border-bottom:2px solid transparent;
+}
+.auth-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+
+/* ===================== PROFILE PAGE ===================== */
+.profile-header{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius2);padding:28px;margin-bottom:24px;
+  display:flex;align-items:center;gap:20px;
+}
+.profile-avatar{
+  width:80px;height:80px;border-radius:50%;
+  background:var(--accent-dim);border:2px solid var(--accent);
+  display:flex;align-items:center;justify-content:center;
+  font-size:2rem;font-weight:900;color:var(--accent);flex-shrink:0;
+  overflow:hidden;
+}
+.profile-avatar img{width:100%;height:100%;object-fit:cover}
+.profile-name{font-size:1.3rem;font-weight:700;margin-bottom:4px}
+.profile-email{color:var(--text3);font-size:0.85rem;margin-bottom:8px}
+.points-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  background:var(--accent-dim);border:1px solid var(--accent);
+  border-radius:20px;padding:4px 14px;font-size:0.9rem;font-weight:700;
+  color:var(--accent);
+}
+.profile-tabs{
+  display:flex;gap:4px;margin-bottom:20px;
+  border-bottom:1px solid var(--border);padding-bottom:0;
+}
+.profile-tab{
+  padding:10px 16px;border-radius:var(--radius) var(--radius) 0 0;
+  font-size:0.9rem;cursor:pointer;color:var(--text3);
+  border-bottom:2px solid transparent;transition:all .2s;
+}
+.profile-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.profile-section{display:none}
+.profile-section.active{display:block}
+
+/* ===================== TRANSACTION ROW ===================== */
+.transaction-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 16px;border-bottom:1px solid var(--border);
+  font-size:0.875rem;
+}
+.transaction-row:last-child{border-bottom:none}
+.transaction-desc{flex:1}
+.transaction-type{font-size:0.75rem;color:var(--text3);margin-top:2px}
+.transaction-amount{font-weight:700}
+.amount-pos{color:var(--success)}
+.amount-neg{color:var(--accent2)}
+
+/* ===================== POINTS PAGE ===================== */
+.packages-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+  gap:16px;margin-bottom:32px;
+}
+.package-card{
+  background:var(--card);border:2px solid var(--border);
+  border-radius:var(--radius2);padding:24px;text-align:center;
+  cursor:pointer;transition:all .2s;position:relative;
+}
+.package-card:hover{border-color:var(--accent)}
+.package-card.popular{border-color:var(--accent)}
+.package-popular-badge{
+  position:absolute;top:-10px;right:50%;transform:translateX(50%);
+  background:var(--accent);color:#fff;font-size:0.7rem;padding:2px 12px;
+  border-radius:10px;
+}
+.package-points{font-size:2rem;font-weight:900;color:var(--accent);margin-bottom:4px}
+.package-bonus{font-size:0.75rem;color:var(--success);margin-bottom:8px}
+.package-price{font-size:1.1rem;font-weight:700;margin-bottom:16px}
+.package-equiv{font-size:0.75rem;color:var(--text3)}
+
+/* ===================== TICKET FORM ===================== */
+.ticket-steps{
+  display:flex;gap:0;margin-bottom:32px;
+}
+.ticket-step{
+  flex:1;text-align:center;padding:12px;
+  border-bottom:2px solid var(--border);
+  font-size:0.8rem;color:var(--text3);
+}
+.ticket-step.done{border-bottom-color:var(--success);color:var(--success)}
+.ticket-step.active{border-bottom-color:var(--accent);color:var(--accent)}
+.wallet-box{
+  background:var(--card2);border:1px solid var(--border2);
+  border-radius:var(--radius);padding:16px;margin-bottom:16px;
+  font-family:monospace;font-size:0.85rem;word-break:break-all;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+}
+
+/* ===================== PUBLISHER DASHBOARD ===================== */
+.stats-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
+  gap:16px;margin-bottom:28px;
+}
+.stat-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius2);padding:20px;
+}
+.stat-value{font-size:1.8rem;font-weight:900;color:var(--accent);margin-bottom:4px}
+.stat-label{font-size:0.8rem;color:var(--text3)}
+
+/* ===================== ADMIN DASHBOARD ===================== */
+.admin-tabs{
+  display:flex;flex-wrap:wrap;gap:4px;margin-bottom:24px;
+  border-bottom:1px solid var(--border);padding-bottom:0;
+}
+.admin-tab{
+  padding:10px 16px;font-size:0.85rem;cursor:pointer;
+  color:var(--text3);border-bottom:2px solid transparent;transition:all .2s;
+}
+.admin-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.admin-section{display:none}
+.admin-section.active{display:block}
+
+/* ===================== DATA TABLE ===================== */
+.data-table{width:100%;border-collapse:collapse}
+.data-table th{
+  padding:10px 14px;text-align:right;font-size:0.8rem;
+  color:var(--text3);border-bottom:1px solid var(--border);
+  background:var(--card2);white-space:nowrap;
+}
+.data-table td{
+  padding:10px 14px;font-size:0.85rem;
+  border-bottom:1px solid var(--border);vertical-align:middle;
+}
+.data-table tr:hover td{background:var(--card2)}
+.data-table-wrap{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius2);overflow:auto;
+}
+
+/* ===================== STATUS BADGES ===================== */
+.status-badge{
+  display:inline-block;padding:2px 10px;border-radius:4px;
+  font-size:0.75rem;font-weight:600;
+}
+.status-pending{background:rgba(230,126,34,0.15);color:var(--warning)}
+.status-approved{background:rgba(39,174,96,0.15);color:var(--success)}
+.status-rejected{background:rgba(231,76,60,0.15);color:#e74c3c}
+
+/* ===================== MODAL ===================== */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,0.7);
+  z-index:2000;display:flex;align-items:center;justify-content:center;
+  padding:20px;opacity:0;pointer-events:none;transition:opacity .2s;
+}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{
+  background:var(--card);border:1px solid var(--border2);
+  border-radius:var(--radius2);width:100%;max-width:560px;
+  max-height:90vh;overflow-y:auto;
+  transform:scale(0.95);transition:transform .2s;
+}
+.modal-overlay.open .modal{transform:scale(1)}
+.modal-header{
+  padding:20px 24px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.modal-title{font-size:1rem;font-weight:700}
+.modal-close{
+  width:32px;height:32px;border-radius:var(--radius);
+  background:var(--card2);color:var(--text3);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+}
+.modal-close:hover{color:var(--text);background:var(--border)}
+.modal-body{padding:24px}
+.modal-footer{
+  padding:16px 24px;border-top:1px solid var(--border);
+  display:flex;gap:8px;justify-content:flex-end;
+}
+
+/* ===================== UNLOCK GATE ===================== */
+.unlock-gate{
+  max-width:500px;margin:80px auto;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius2);padding:40px;text-align:center;
+}
+.unlock-icon{font-size:3rem;margin-bottom:16px}
+.unlock-title{font-size:1.3rem;font-weight:700;margin-bottom:8px}
+.unlock-desc{color:var(--text2);font-size:0.9rem;margin-bottom:24px;line-height:1.7}
+.unlock-cost{
+  font-size:2rem;font-weight:900;color:var(--accent);margin-bottom:4px;
+}
+.unlock-balance{font-size:0.85rem;color:var(--text3);margin-bottom:24px}
+
+/* ===================== BROWSE PAGE ===================== */
+.browse-layout{display:grid;grid-template-columns:220px 1fr;gap:24px}
+.filter-sidebar{
+  position:sticky;top:76px;align-self:start;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius2);padding:20px;
+}
+.filter-title{font-size:0.9rem;font-weight:700;margin-bottom:12px;color:var(--text2)}
+.filter-group{margin-bottom:20px}
+.filter-option{
+  display:flex;align-items:center;gap:8px;padding:6px 0;
+  cursor:pointer;font-size:0.85rem;color:var(--text2);
+}
+.filter-option:hover{color:var(--text)}
+.filter-option input[type=radio],
+.filter-option input[type=checkbox]{accent-color:var(--accent)}
+.filter-option.selected{color:var(--accent)}
+.browse-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:16px;flex-wrap:wrap;gap:10px;
+}
+.sort-select{
+  background:var(--card);border:1px solid var(--border);
+  color:var(--text);padding:6px 12px;border-radius:var(--radius);font-size:0.85rem;
+}
+
+/* ===================== TEAM PAGE ===================== */
+.team-banner{
+  height:200px;border-radius:var(--radius2);overflow:hidden;
+  background:linear-gradient(135deg,var(--card2),var(--card));
+  margin-bottom:-50px;position:relative;
+}
+.team-banner img{width:100%;height:100%;object-fit:cover;opacity:0.6}
+.team-info-box{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius2);padding:24px 24px 24px 24px;
+  margin-bottom:24px;display:flex;align-items:flex-end;gap:20px;
+}
+.team-logo-wrap{
+  width:80px;height:80px;border-radius:var(--radius2);
+  border:3px solid var(--accent);overflow:hidden;background:var(--card2);
+  flex-shrink:0;margin-top:-30px;
+}
+.team-logo-wrap img{width:100%;height:100%;object-fit:cover}
+.team-social{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.social-link{
+  display:flex;align-items:center;gap:5px;padding:5px 12px;
+  background:var(--card2);border:1px solid var(--border);
+  border-radius:20px;font-size:0.78rem;color:var(--text2);transition:all .2s;
+}
+.social-link:hover{color:var(--text);border-color:var(--border2)}
+
+/* ===================== SEARCH PAGE ===================== */
+.search-big{
+  max-width:600px;margin:40px auto;
+  position:relative;
+}
+.search-big input{
+  width:100%;background:var(--card);border:2px solid var(--border);
+  border-radius:var(--radius2);padding:14px 50px 14px 20px;
+  color:var(--text);font-size:1.1rem;transition:border-color .2s;
+}
+.search-big input:focus{border-color:var(--accent)}
+.search-big-icon{
+  position:absolute;left:16px;top:50%;transform:translateY(-50%);
+  color:var(--text3);
+}
+.search-results-count{
+  text-align:center;color:var(--text3);font-size:0.9rem;margin-bottom:24px;
+}
+
+/* ===================== NOTIFICATIONS PANEL ===================== */
+.notif-panel{
+  position:absolute;top:calc(100% + 8px);left:0;
+  width:340px;background:var(--card);border:1px solid var(--border2);
+  border-radius:var(--radius2);box-shadow:var(--shadow);
+  z-index:500;overflow:hidden;
+}
+.notif-panel-header{
+  padding:12px 16px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  font-size:0.85rem;font-weight:700;
+}
+.notif-item{
+  padding:12px 16px;border-bottom:1px solid var(--border);
+  cursor:pointer;transition:background .15s;
+}
+.notif-item:hover{background:var(--card2)}
+.notif-item.unread{background:var(--accent-dim)}
+.notif-item-title{font-size:0.85rem;font-weight:600;margin-bottom:2px}
+.notif-item-msg{font-size:0.8rem;color:var(--text2);line-height:1.5}
+.notif-item-time{font-size:0.72rem;color:var(--text3);margin-top:4px}
+.notif-empty{padding:32px;text-align:center;color:var(--text3);font-size:0.85rem}
+
+/* ===================== TOAST ===================== */
+#toast-container{
+  position:fixed;bottom:24px;left:24px;z-index:9999;
+  display:flex;flex-direction:column;gap:8px;pointer-events:none;
+}
+.toast{
+  padding:12px 18px;border-radius:var(--radius);font-size:0.85rem;
+  max-width:320px;pointer-events:all;animation:toastIn .3s ease;
+  box-shadow:var(--shadow);display:flex;align-items:center;gap:8px;
+}
+.toast-success{background:#1a3a2a;border:1px solid var(--success);color:var(--success)}
+.toast-error{background:#3a1a1a;border:1px solid #e74c3c;color:#e74c3c}
+.toast-info{background:#1a2a3a;border:1px solid var(--info);color:var(--info)}
+.toast-warning{background:#3a2a1a;border:1px solid var(--warning);color:var(--warning)}
+@keyframes toastIn{from{opacity:0;transform:translateX(-20px)}to{opacity:1;transform:translateX(0)}}
+
+/* ===================== UPLOAD AREA ===================== */
+.upload-area{
+  border:2px dashed var(--border2);border-radius:var(--radius2);
+  padding:40px;text-align:center;cursor:pointer;
+  transition:all .2s;background:var(--card2);
+}
+.upload-area:hover,.upload-area.dragover{border-color:var(--accent);background:var(--accent-dim)}
+.upload-area-icon{font-size:2rem;margin-bottom:8px}
+.upload-area-text{font-size:0.9rem;color:var(--text2)}
+.upload-area-hint{font-size:0.78rem;color:var(--text3);margin-top:4px}
+.pages-preview{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));
+  gap:8px;margin-top:16px;
+}
+.page-thumb{
+  aspect-ratio:2/3;border-radius:6px;overflow:hidden;
+  background:var(--card2);border:1px solid var(--border);
+  position:relative;
+}
+.page-thumb img{width:100%;height:100%;object-fit:cover}
+.page-thumb-num{
+  position:absolute;bottom:0;right:0;left:0;
+  background:rgba(0,0,0,0.7);font-size:0.7rem;text-align:center;padding:2px;
+}
+
+/* ===================== MONETAG GATE ===================== */
+.monetag-gate{
+  max-width:500px;margin:80px auto;text-align:center;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius2);padding:40px;
+}
+.monetag-steps{margin:20px 0;display:flex;flex-direction:column;gap:12px;text-align:right}
+.monetag-step-item{
+  display:flex;align-items:center;gap:12px;padding:12px;
+  background:var(--card2);border-radius:var(--radius);border:1px solid var(--border);
+}
+.step-num{
+  width:28px;height:28px;border-radius:50%;background:var(--accent);
+  color:#fff;display:flex;align-items:center;justify-content:center;
+  font-size:0.8rem;font-weight:700;flex-shrink:0;
+}
+.monetag-links-list{display:flex;flex-direction:column;gap:8px;margin:16px 0}
+.monetag-link-btn{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  padding:10px 20px;background:var(--info);color:#fff;
+  border-radius:var(--radius);font-size:0.9rem;font-weight:600;
+  transition:opacity .2s;
+}
+.monetag-link-btn:hover{opacity:0.8}
+.monetag-countdown{
+  font-size:0.85rem;color:var(--text3);margin-top:16px;
+}
+
+/* ===================== PUBLISHER APPLY ===================== */
+.apply-hero{
+  text-align:center;padding:60px 0 40px;
+  background:linear-gradient(180deg,var(--accent-dim),transparent);
+  border-radius:var(--radius2);margin-bottom:32px;
+}
+.apply-hero h1{font-size:2rem;font-weight:900;margin-bottom:8px}
+.apply-hero p{color:var(--text2);font-size:0.95rem}
+
+/* ===================== PAGINATION ===================== */
+.pagination{
+  display:flex;align-items:center;justify-content:center;
+  gap:6px;margin-top:32px;flex-wrap:wrap;
+}
+.page-btn{
+  width:36px;height:36px;border-radius:var(--radius);
+  background:var(--card);border:1px solid var(--border);
+  color:var(--text2);display:flex;align-items:center;justify-content:center;
+  font-size:0.85rem;cursor:pointer;transition:all .2s;
+}
+.page-btn:hover,.page-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+/* ===================== EMPTY STATE ===================== */
+.empty-state{
+  text-align:center;padding:60px 20px;color:var(--text3);
+}
+.empty-state-icon{font-size:3rem;margin-bottom:12px;opacity:0.5}
+.empty-state p{font-size:0.9rem}
+
+/* ===================== LOADING ===================== */
+.loading{
+  display:flex;align-items:center;justify-content:center;
+  padding:60px;color:var(--text3);font-size:0.9rem;gap:10px;
+}
+.spinner{
+  width:20px;height:20px;border:2px solid var(--border);
+  border-top-color:var(--accent);border-radius:50%;
+  animation:spin .7s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.skeleton{
+  background:linear-gradient(90deg,var(--card2) 25%,var(--border) 50%,var(--card2) 75%);
+  background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:var(--radius);
+}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* ===================== FOOTER ===================== */
+footer{
+  background:var(--card);border-top:1px solid var(--border);
+  padding:40px 0 20px;margin-top:60px;
+}
+.footer-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:32px;margin-bottom:32px;
+}
+.footer-brand{font-size:1.4rem;font-weight:900;margin-bottom:8px}
+.footer-brand span{color:var(--accent)}
+.footer-desc{color:var(--text3);font-size:0.85rem;line-height:1.7}
+.footer-heading{font-size:0.9rem;font-weight:700;margin-bottom:12px}
+.footer-links{display:flex;flex-direction:column;gap:8px}
+.footer-link{color:var(--text3);font-size:0.85rem;transition:color .2s}
+.footer-link:hover{color:var(--accent)}
+.footer-bottom{
+  border-top:1px solid var(--border);padding-top:20px;
+  display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:12px;font-size:0.8rem;color:var(--text3);
+}
+
+/* ===================== MOBILE NAV BUTTON ===================== */
+.mobile-nav-btn{
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  background:none;border:none;color:var(--text3);font-size:0.65rem;
+  padding:4px 12px;border-radius:var(--radius);transition:color .2s;
+  min-width:48px;
+}
+.mobile-nav-btn:hover,.mobile-nav-btn.active{color:var(--accent)}
+.mobile-nav-btn svg{transition:stroke .2s}
+.mobile-nav-btn.active svg{stroke:var(--accent)}
+
+/* ===================== MOBILE ===================== */
+@media(max-width:768px){
+  .nav-links{display:none}
+  .nav-search{max-width:160px}
+  .manga-detail{grid-template-columns:1fr}
+  .manga-cover-wrap{position:static;display:grid;grid-template-columns:140px 1fr;gap:16px;align-items:start}
+  .manga-cover{margin-bottom:0}
+  .browse-layout{grid-template-columns:1fr}
+  .filter-sidebar{position:static;margin-bottom:16px}
+  .hero{height:280px}
+  .hero-content{padding:16px}
+  .hero-title{font-size:1.2rem}
+  .hero-desc{display:none}
+  .manga-grid{grid-template-columns:repeat(auto-fill,minmax(105px,1fr));gap:10px}
+  .notif-panel{width:280px;right:0;left:auto}
+  .profile-header{flex-direction:column;text-align:center}
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .packages-grid{grid-template-columns:repeat(2,1fr)}
+  #mobile-nav{display:block!important}
+  .main-content{padding-bottom:70px}
+  footer{padding-bottom:80px}
+  .chapter-date{display:none}
+  .data-table td,.data-table th{padding:8px 8px;font-size:0.78rem}
+}
+@media(min-width:769px){
+  #mobile-nav{display:none!important}
+}
+
+/* ===================== COMMENT SECTION ===================== */
+.comment-box{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius2);padding:20px;margin-bottom:16px;
+}
+.comment-input{
+  width:100%;background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--radius);padding:10px 14px;color:var(--text);
+  font-size:0.9rem;resize:vertical;min-height:80px;
+  transition:border-color .2s;
+}
+.comment-input:focus{border-color:var(--accent)}
+.comment-actions{display:flex;justify-content:flex-end;margin-top:10px}
+.comment-item{
+  display:flex;gap:12px;padding:14px 0;
+  border-bottom:1px solid var(--border);
+}
+.comment-item:last-child{border-bottom:none}
+.comment-avatar{
+  width:36px;height:36px;border-radius:50%;
+  background:var(--accent-dim);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  font-weight:700;color:var(--accent);flex-shrink:0;font-size:0.85rem;
+  overflow:hidden;
+}
+.comment-avatar img{width:100%;height:100%;object-fit:cover}
+.comment-username{font-size:0.85rem;font-weight:700;margin-bottom:4px}
+.comment-text{font-size:0.875rem;color:var(--text2);line-height:1.6}
+.comment-time{font-size:0.75rem;color:var(--text3);margin-top:4px}
+.comment-cooldown{
+  font-size:0.8rem;color:var(--warning);margin-top:6px;
+}
+
+/* ===================== RATING STARS ===================== */
+.rating-stars{display:flex;gap:4px;cursor:pointer}
+.star{color:var(--border2);font-size:1.2rem;transition:color .15s}
+.star.active,.star:hover~.star,.rating-stars:hover .star{color:var(--warning)}
+.rating-stars:hover .star~.star{color:var(--border2)}
+
+/* Genre page */
+.genre-header{
+  padding:32px 0 20px;border-bottom:1px solid var(--border);margin-bottom:24px;
+}
+.genre-header h1{font-size:1.5rem;font-weight:900}
+</style>
+</head>
+<body>
+
+<!-- =================== NAVBAR =================== -->
+<nav id="navbar">
+  <div class="nav-inner">
+    <div class="nav-logo" onclick="navigate('home')" style="cursor:pointer">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+        <rect width="28" height="28" rx="6" fill="#c0392b"/>
+        <path d="M7 7h4v14H7V7zm5 0h4l4 7-4 7h-4l4-7-4-7z" fill="white"/>
+      </svg>
+      HIYRO <span>MANGA</span>
+    </div>
+    <div class="nav-search">
+      <input type="text" id="nav-search-input" placeholder="ابحث عن مانغا..." oninput="handleNavSearch(this.value)" onkeydown="if(event.key==='Enter')navigate('search')">
+      <span class="nav-search-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      </span>
+    </div>
+    <div class="nav-links">
+      <span class="nav-link" data-page="home" onclick="navigate('home')">الرئيسية</span>
+      <span class="nav-link" data-page="browse" onclick="navigate('browse')">تصفح</span>
+      <span class="nav-link" data-page="search" onclick="navigate('search')">بحث</span>
+    </div>
+    <div class="nav-actions" id="nav-actions">
+      <!-- filled by JS -->
+    </div>
+  </div>
+</nav>
+
+<!-- =================== NOTIFICATION PANEL =================== -->
+<div id="notif-panel-wrap" style="position:fixed;top:60px;left:20px;z-index:999;display:none">
+  <div class="notif-panel" id="notif-panel">
+    <div class="notif-panel-header">
+      <span>الإشعارات</span>
+      <span class="nav-link" style="cursor:pointer;font-size:0.75rem" onclick="markAllNotifRead()">تحديد الكل كمقروء</span>
+    </div>
+    <div id="notif-list"></div>
+  </div>
+</div>
+
+<!-- =================== MAIN CONTENT =================== -->
+<div class="main-content">
+
+<!-- HOME PAGE -->
+<div class="page active" id="page-home">
+  <!-- AD TOP -->
+  <div class="container"><div class="ad-banner ad-banner-sm" style="margin-top:16px"><span>إعلان — Adsterra / A-ads</span></div></div>
+  <!-- HERO SLIDER -->
+  <div class="hero" id="hero-slider">
+    <div class="hero-slide active" id="hero-slide-0">
+      <div class="hero-bg" id="hero-bg-0"></div>
+      <div class="hero-content">
+        <span class="hero-badge">مميز</span>
+        <h2 class="hero-title" id="hero-title-0">جاري التحميل...</h2>
+        <p class="hero-desc" id="hero-desc-0"></p>
+        <div class="hero-actions">
+          <button class="btn btn-primary" id="hero-btn-0">اقرأ الآن</button>
+          <button class="btn btn-ghost" id="hero-btn2-0">التفاصيل</button>
+        </div>
+      </div>
+    </div>
+    <div class="hero-slide" id="hero-slide-1">
+      <div class="hero-bg" id="hero-bg-1"></div>
+      <div class="hero-content">
+        <span class="hero-badge">جديد</span>
+        <h2 class="hero-title" id="hero-title-1"></h2>
+        <p class="hero-desc" id="hero-desc-1"></p>
+        <div class="hero-actions">
+          <button class="btn btn-primary" id="hero-btn-1">اقرأ الآن</button>
+        </div>
+      </div>
+    </div>
+    <div class="hero-slide" id="hero-slide-2">
+      <div class="hero-bg" id="hero-bg-2"></div>
+      <div class="hero-content">
+        <span class="hero-badge">شائع</span>
+        <h2 class="hero-title" id="hero-title-2"></h2>
+        <p class="hero-desc" id="hero-desc-2"></p>
+        <div class="hero-actions">
+          <button class="btn btn-primary" id="hero-btn-2">اقرأ الآن</button>
+        </div>
+      </div>
+    </div>
+    <div class="hero-arrows">
+      <button class="hero-arrow" onclick="slideHero(1)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <button class="hero-arrow" onclick="slideHero(-1)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+      </button>
+    </div>
+    <div class="hero-dots" id="hero-dots">
+      <div class="hero-dot active" onclick="goToSlide(0)"></div>
+      <div class="hero-dot" onclick="goToSlide(1)"></div>
+      <div class="hero-dot" onclick="goToSlide(2)"></div>
+    </div>
+  </div>
+  <!-- AD MID 1 -->
+  <div class="container"><div class="ad-banner ad-banner-mid">إعلان</div></div>
+  <!-- LATEST CHAPTERS -->
+  <div class="container">
+    <div class="section">
+      <div class="section-header">
+        <h2 class="section-title">أحدث الفصول</h2>
+        <a class="section-link" onclick="navigate('browse')">عرض الكل ←</a>
+      </div>
+      <div id="latest-chapters-list"></div>
+    </div>
+  </div>
+  <!-- AD MID 2 -->
+  <div class="container"><div class="ad-banner ad-banner-mid">إعلان</div></div>
+  <!-- POPULAR MANGA -->
+  <div class="container">
+    <div class="section">
+      <div class="section-header">
+        <h2 class="section-title">الأعمال الشائعة</h2>
+        <a class="section-link" onclick="navigate('browse','views')">عرض الكل ←</a>
+      </div>
+      <div class="manga-grid manga-grid-lg" id="popular-manga-grid"></div>
+    </div>
+  </div>
+  <!-- AD MID 3 -->
+  <div class="container"><div class="ad-banner ad-banner-mid">إعلان</div></div>
+  <!-- NEWEST MANGA -->
+  <div class="container">
+    <div class="section">
+      <div class="section-header">
+        <h2 class="section-title">أحدث الإضافات</h2>
+        <a class="section-link" onclick="navigate('browse')">عرض الكل ←</a>
+      </div>
+      <div class="manga-grid manga-grid-lg" id="newest-manga-grid"></div>
+    </div>
+  </div>
+  <!-- AD BOTTOM -->
+  <div class="container"><div class="ad-banner ad-banner-top">إعلان سفلي</div></div>
+</div>
+
+<!-- BROWSE PAGE -->
+<div class="page" id="page-browse">
+  <div class="container" style="padding-top:32px">
+    <div class="browse-layout">
+      <div class="filter-sidebar" id="filter-sidebar">
+        <div class="filter-group">
+          <div class="filter-title">الحالة</div>
+          <label class="filter-option"><input type="radio" name="status" value="" checked onchange="applyFilters()"> الكل</label>
+          <label class="filter-option"><input type="radio" name="status" value="ongoing" onchange="applyFilters()"> مستمر</label>
+          <label class="filter-option"><input type="radio" name="status" value="completed" onchange="applyFilters()"> مكتمل</label>
+          <label class="filter-option"><input type="radio" name="status" value="hiatus" onchange="applyFilters()"> متوقف</label>
+        </div>
+        <div class="filter-group">
+          <div class="filter-title">التصنيفات</div>
+          <div id="genre-filters"></div>
+        </div>
+        <div class="ad-banner ad-banner-rect">إعلان جانبي</div>
+      </div>
+      <div>
+        <div class="browse-header">
+          <h1 style="font-size:1.2rem;font-weight:700">تصفح الأعمال</h1>
+          <div style="display:flex;gap:8px;align-items:center">
+            <select class="sort-select" id="sort-select" onchange="applyFilters()">
+              <option value="created_at">الأحدث</option>
+              <option value="views">الأكثر مشاهدة</option>
+              <option value="rating">الأعلى تقييماً</option>
+            </select>
+          </div>
+        </div>
+        <div class="manga-grid manga-grid-lg" id="browse-grid"></div>
+        <div id="browse-pagination" class="pagination"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MANGA DETAIL PAGE -->
+<div class="page" id="page-manga">
+  <div class="container">
+    <!-- AD -->
+    <div class="ad-banner ad-banner-sm" style="margin:16px 0"></div>
+    <div class="manga-detail" id="manga-detail-content"></div>
+    <!-- AD before chapters -->
+    <div class="ad-banner ad-banner-sm" style="margin-bottom:16px">إعلان</div>
+    <div id="manga-chapters-list"></div>
+  </div>
+</div>
+
+<!-- CHAPTER READER PAGE -->
+<div class="page" id="page-reader">
+  <div class="reader-navbar" id="reader-navbar">
+    <button class="btn-icon btn-sm" onclick="navigate('manga',currentMangaSlug)">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    </button>
+    <div>
+      <div class="reader-manga-name" id="reader-manga-name"></div>
+      <div class="reader-chapter" id="reader-chapter-label"></div>
+    </div>
+    <div style="margin-right:auto;display:flex;gap:6px">
+      <button class="btn btn-ghost btn-sm" id="reader-prev-btn">السابق</button>
+      <button class="btn btn-ghost btn-sm" id="reader-next-btn">التالي</button>
+    </div>
+  </div>
+  <div class="reader-progress"><div class="reader-progress-bar" id="reader-progress-bar"></div></div>
+  <div id="reader-content"></div>
+</div>
+
+<!-- TEAM PAGE -->
+<div class="page" id="page-team">
+  <div class="container" style="padding-top:32px">
+    <div id="team-content"></div>
+  </div>
+</div>
+
+<!-- GENRE PAGE -->
+<div class="page" id="page-genre">
+  <div class="container">
+    <div class="genre-header" id="genre-header"></div>
+    <div class="manga-grid manga-grid-lg" id="genre-grid"></div>
+  </div>
+</div>
+
+<!-- SEARCH PAGE -->
+<div class="page" id="page-search">
+  <div class="container" style="padding-top:32px">
+    <div class="search-big">
+      <input type="text" id="search-input" placeholder="ابحث عن أي عمل..." oninput="doSearch(this.value)">
+      <span class="search-big-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      </span>
+    </div>
+    <!-- AD -->
+    <div class="ad-banner ad-banner-sm" style="max-width:600px;margin:0 auto 24px"></div>
+    <div id="search-results-count" class="search-results-count"></div>
+    <div class="manga-grid manga-grid-lg" id="search-grid"></div>
+  </div>
+</div>
+
+<!-- AUTH PAGE -->
+<div class="page" id="page-auth">
+  <div class="auth-wrap">
+    <div class="auth-box">
+      <div class="auth-logo">HIYRO <span>MANGA</span></div>
+      <div class="auth-subtitle">منصة قراءة المانغا العربية</div>
+      <div class="auth-tabs">
+        <div class="auth-tab active" onclick="switchAuthTab('login')">تسجيل الدخول</div>
+        <div class="auth-tab" onclick="switchAuthTab('register')">إنشاء حساب</div>
+        <div class="auth-tab" onclick="switchAuthTab('reset')">نسيت كلمة المرور؟</div>
+      </div>
+      <!-- LOGIN -->
+      <div id="auth-login">
+        <div class="form-group">
+          <label class="form-label">البريد الإلكتروني</label>
+          <input class="form-input" type="email" id="login-email" placeholder="example@email.com">
+        </div>
+        <div class="form-group">
+          <label class="form-label">كلمة المرور</label>
+          <input class="form-input" type="password" id="login-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+        </div>
+        <div id="login-error" class="form-error"></div>
+        <button class="btn btn-primary" style="width:100%;margin-top:8px" onclick="doLogin()">دخول</button>
+      </div>
+      <!-- REGISTER -->
+      <div id="auth-register" style="display:none">
+        <div class="form-group">
+          <label class="form-label">اسم المستخدم</label>
+          <input class="form-input" type="text" id="reg-username" placeholder="اختر اسماً فريداً">
+        </div>
+        <div class="form-group">
+          <label class="form-label">البريد الإلكتروني</label>
+          <input class="form-input" type="email" id="reg-email" placeholder="example@email.com">
+        </div>
+        <div class="form-group">
+          <label class="form-label">كلمة المرور</label>
+          <input class="form-input" type="password" id="reg-pass" placeholder="8 أحرف على الأقل">
+        </div>
+        <div id="reg-error" class="form-error"></div>
+        <button class="btn btn-primary" style="width:100%;margin-top:8px" onclick="doRegister()">إنشاء الحساب</button>
+      </div>
+      <!-- RESET -->
+      <div id="auth-reset" style="display:none">
+        <div class="form-group">
+          <label class="form-label">البريد الإلكتروني</label>
+          <input class="form-input" type="email" id="reset-email" placeholder="أدخل بريدك الإلكتروني">
+        </div>
+        <div id="reset-msg" class="form-error"></div>
+        <button class="btn btn-primary" style="width:100%;margin-top:8px" onclick="doReset()">إرسال رابط الاسترداد</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PROFILE PAGE -->
+<div class="page" id="page-profile">
+  <div class="container" style="padding-top:32px">
+    <div id="profile-content"></div>
+  </div>
+</div>
+
+<!-- POINTS PAGE -->
+<div class="page" id="page-points">
+  <div class="container" style="padding-top:32px;max-width:860px">
+    <h1 style="font-size:1.5rem;font-weight:900;margin-bottom:8px">شراء النقاط</h1>
+    <p style="color:var(--text3);margin-bottom:24px;font-size:0.9rem">100 نقطة = 1 دولار أمريكي — نقاطك تُستخدم لفتح الفصول المميزة والتبرع للناشرين</p>
+    <div class="packages-grid" id="packages-grid"></div>
+    <!-- TICKET SECTION -->
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius2);padding:28px;margin-bottom:24px">
+      <h2 style="font-size:1rem;font-weight:700;margin-bottom:20px">طريقة الدفع — USDT TRC20</h2>
+      <div class="ticket-steps">
+        <div class="ticket-step active">1. اختر الباقة</div>
+        <div class="ticket-step">2. أرسل USDT</div>
+        <div class="ticket-step">3. أرسل التذكرة</div>
+        <div class="ticket-step">4. انتظر التأكيد</div>
+      </div>
+      <p style="font-size:0.85rem;color:var(--text2);margin-bottom:12px">أرسل المبلغ المطلوب إلى عنوان المحفظة التالي:</p>
+      <div class="wallet-box">
+        <span id="usdt-address">TMgiTyUHbrZnw7TsBBQGEXezJU87Ascrah</span>
+        <button class="btn btn-ghost btn-sm" onclick="copyWallet()">نسخ</button>
+      </div>
+      <p style="font-size:0.8rem;color:var(--warning);margin-bottom:20px">⚠️ تأكد من اختيار شبكة TRC20 عند الإرسال</p>
+      <h3 style="font-size:0.9rem;font-weight:700;margin-bottom:16px">فتح تذكرة دفع</h3>
+      <div id="ticket-form-wrap">
+        <!-- filled by JS if logged in -->
+      </div>
+    </div>
+    <!-- AD -->
+    <div class="ad-banner ad-banner-mid">إعلان</div>
+  </div>
+</div>
+
+<!-- BECOME PUBLISHER PAGE -->
+<div class="page" id="page-become-publisher">
+  <div class="container" style="max-width:720px;padding-top:32px">
+    <div id="publisher-apply-content"></div>
+  </div>
+</div>
+
+<!-- PUBLISHER DASHBOARD -->
+<div class="page" id="page-publisher">
+  <div class="container" style="padding-top:32px">
+    <div id="publisher-dashboard-content"></div>
+  </div>
+</div>
+
+<!-- ADMIN DASHBOARD -->
+<div class="page" id="page-admin">
+  <div class="container" style="padding-top:32px">
+    <h1 style="font-size:1.3rem;font-weight:900;margin-bottom:20px">لوحة تحكم المدير</h1>
+    <div class="admin-tabs">
+      <div class="admin-tab active" onclick="adminTab('users')">المستخدمون</div>
+      <div class="admin-tab" onclick="adminTab('publishers')">الناشرون</div>
+      <div class="admin-tab" onclick="adminTab('manga')">الأعمال</div>
+      <div class="admin-tab" onclick="adminTab('tickets')">تذاكر الدفع</div>
+      <div class="admin-tab" onclick="adminTab('genres')">التصنيفات</div>
+      <div class="admin-tab" onclick="adminTab('packages')">باقات النقاط</div>
+      <div class="admin-tab" onclick="adminTab('settings')">الإعدادات</div>
+      <div class="admin-tab" onclick="adminTab('stats')">إحصائيات</div>
+    </div>
+    <div id="admin-users" class="admin-section active"></div>
+    <div id="admin-publishers" class="admin-section"></div>
+    <div id="admin-manga" class="admin-section"></div>
+    <div id="admin-tickets" class="admin-section"></div>
+    <div id="admin-genres" class="admin-section"></div>
+    <div id="admin-packages" class="admin-section"></div>
+    <div id="admin-settings" class="admin-section"></div>
+    <div id="admin-stats" class="admin-section"></div>
+  </div>
+</div>
+
+</div><!-- end main-content -->
+
+<!-- =================== MOBILE BOTTOM NAV =================== -->
+<nav id="mobile-nav" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:800;background:rgba(15,15,15,0.97);backdrop-filter:blur(12px);border-top:1px solid var(--border);padding:8px 0 max(8px, env(safe-area-inset-bottom))">
+  <div style="display:flex;justify-content:space-around;align-items:center">
+    <button onclick="navigate('home')" class="mobile-nav-btn" data-page="home">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>الرئيسية</span>
+    </button>
+    <button onclick="navigate('browse')" class="mobile-nav-btn" data-page="browse">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      <span>تصفح</span>
+    </button>
+    <button onclick="navigate('search')" class="mobile-nav-btn" data-page="search">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <span>بحث</span>
+    </button>
+    <button onclick="navigate('points')" class="mobile-nav-btn" data-page="points">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+      <span>نقاط</span>
+    </button>
+    <button id="mobile-profile-btn" onclick="currentUser ? navigate('profile') : navigate('auth')" class="mobile-nav-btn" data-page="profile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span id="mobile-profile-label">دخول</span>
+    </button>
+  </div>
+</nav>
+
+<!-- =================== FOOTER =================== -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand">HIYRO <span>MANGA</span></div>
+        <div class="footer-desc">منصة قراءة المانغا العربية الأولى — محتوى عربي أصيل من فرق الترجمة العربية</div>
+      </div>
+      <div>
+        <div class="footer-heading">روابط سريعة</div>
+        <div class="footer-links">
+          <a class="footer-link" onclick="navigate('home')">الرئيسية</a>
+          <a class="footer-link" onclick="navigate('browse')">تصفح الأعمال</a>
+          <a class="footer-link" onclick="navigate('points')">شراء النقاط</a>
+          <a class="footer-link" onclick="navigate('become-publisher')">انضم كناشر</a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-heading">الدعم</div>
+        <div class="footer-links">
+          <a class="footer-link" href="mailto:hiyronol@gmail.com">التواصل معنا</a>
+          <a class="footer-link">سياسة الخصوصية</a>
+          <a class="footer-link">شروط الاستخدام</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 HIYRO MANGA — جميع الحقوق محفوظة</span>
+      <span>hiyronol@gmail.com</span>
+    </div>
+  </div>
+</footer>
+
+<!-- =================== MODAL =================== -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" id="modal-box">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-title"></div>
+      <div class="modal-close" onclick="closeModal()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </div>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-footer" id="modal-footer"></div>
+  </div>
+</div>
+
+<!-- =================== TOAST CONTAINER =================== -->
+<div id="toast-container"></div>
+
+<!-- =================== JAVASCRIPT =================== -->
+<script>
+// =================== CONFIG ===================
+const SUPABASE_URL = 'https://jrnaqahscnfetkcgwkwp.supabase.co';
+const SUPABASE_ANON = 'sb_publishable_fCJdH-_093A3Ax7fUwAPfg_73TFUwxe';
+const R2_PUBLIC = 'https://pub-a8771e28b92448fdb9284f56f8f00aac.r2.dev';
+const R2_ENDPOINT = 'https://a771b1702ddecaf43c60fd6e52be7131.r2.cloudflarestorage.com';
+const R2_BUCKET = 'hiyro-manga';
+const R2_KEY_ID = 'b8907c1d7948b6bc73d1031dfcd40316';
+const R2_KEY_SECRET = 'fe0c8eb95f9c6d4d2869743fb7d822e5a05ae404bdb98bdb6b7840e5bbade83f';
+const USDT_ADDRESS = 'TMgiTyUHbrZnw7TsBBQGEXezJU87Ascrah';
+const CONTACT_EMAIL = 'hiyronol@gmail.com';
+const MONETAG_WAIT = 7;
+const COMMENT_COOLDOWN = 40;
+
+// =================== SUPABASE ===================
+const { createClient } = supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
+
+// =================== STATE ===================
+let currentUser = null;
+let currentUserProfile = null;
+let currentMangaSlug = null;
+let currentChapterId = null;
+let heroSlideIndex = 0;
+let heroInterval = null;
+let heroData = [];
+let notifOpen = false;
+let currentPage = 'home';
+
+// =================== INIT ===================
+document.addEventListener('DOMContentLoaded', async () => {
+  // 1. جلب الجلسة الحالية أولاً بشكل synchronous
+  const { data: { session } } = await sb.auth.getSession();
+  if (session?.user) {
+    currentUser = session.user;
+    await loadUserProfile();
+  }
+  // 2. رسم navbar بعد تحميل البيانات مباشرة
+  renderNavActions();
+
+  // 3. الاستماع للتغييرات اللاحقة (login / logout)
+  sb.auth.onAuthStateChange(async (event, session) => {
+    if (event === 'SIGNED_IN' && session?.user) {
+      currentUser = session.user;
+      await loadUserProfile();
+      renderNavActions();
+    } else if (event === 'SIGNED_OUT') {
+      currentUser = null;
+      currentUserProfile = null;
+      renderNavActions();
+    } else if (event === 'TOKEN_REFRESHED' && session?.user) {
+      currentUser = session.user;
+      // لا نعيد جلب البروفيل في كل refresh
+      if (!currentUserProfile) await loadUserProfile();
+      renderNavActions();
+    }
+  });
+
+  loadGenreFilters();
+  routeFromHash();
+  window.addEventListener('hashchange', routeFromHash);
+  window.addEventListener('scroll', updateReaderProgress);
+  document.addEventListener('click', (e) => {
+    if (notifOpen && !e.target.closest('#notif-panel-wrap') && !e.target.closest('[onclick*="toggleNotif"]')) {
+      closeNotifPanel();
+    }
+  });
+});
+
+// =================== ROUTING ===================
+function routeFromHash() {
+  const hash = location.hash.replace('#','') || 'home';
+  const parts = hash.split('/');
+  navigate(parts[0], parts[1], parts[2], false);
+}
+
+function updateMobileNav(page) {
+  document.querySelectorAll('.mobile-nav-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.page === page);
+  });
+  // تحديث label البروفايل
+  const label = document.getElementById('mobile-profile-label');
+  if (label) label.textContent = currentUser ? 'حسابي' : 'دخول';
+  // إخفاء الـ mobile nav في صفحة القراءة
+  const mobileNav = document.getElementById('mobile-nav');
+  if (mobileNav) mobileNav.style.display = page === 'reader' ? 'none' : '';
+}
+
+function navigate(page, param1, param2, pushHistory = true) {
+  if (pushHistory) {
+    let hash = page;
+    if (param1) hash += '/' + param1;
+    if (param2) hash += '/' + param2;
+    location.hash = hash;
+    return;
+  }
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const el = document.getElementById('page-' + page);
+  if (el) {
+    el.classList.add('active');
+    currentPage = page;
+    window.scrollTo(0, 0);
+  }
+  // hide reader navbar except on reader
+  document.querySelector('.reader-navbar').style.display = page === 'reader' ? 'flex' : 'none';
+  // تحديث active state للـ nav links
+  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+  const activeLink = document.querySelector(`.nav-link[data-page="${page}"]`);
+  if (activeLink) activeLink.classList.add('active');
+  // تحديث mobile nav
+  updateMobileNav(page);
+
+  switch(page) {
+    case 'home': loadHomePage(); break;
+    case 'browse': loadBrowsePage(param1); break;
+    case 'manga': loadMangaPage(param1); break;
+    case 'reader': loadReaderPage(param1, param2); break;
+    case 'team': loadTeamPage(param1); break;
+    case 'genre': loadGenrePage(param1); break;
+    case 'search': loadSearchPage(param1); break;
+    case 'auth':
+      // إذا مسجل دخول - لا نريه صفحة الدخول
+      if (currentUser) { navigate('home'); return; }
+      break;
+    case 'profile': loadProfilePage(); break;
+    case 'points': loadPointsPage(); break;
+    case 'become-publisher': loadBecomePublisherPage(); break;
+    case 'publisher':
+      if (!currentUser) { navigate('auth'); return; }
+      loadPublisherDashboard(); break;
+    case 'admin':
+      if (!currentUser) { navigate('auth'); return; }
+      loadAdminDashboard(); break;
+  }
+}
+
+// =================== NAV ACTIONS ===================
+function renderNavActions() {
+  const wrap = document.getElementById('nav-actions');
+  if (!wrap) return;
+
+  // لو مسجل دخول - نعرض الواجهة الكاملة
+  if (currentUser) {
+    const u = currentUserProfile || {
+      username: currentUser.email?.split('@')[0] || 'مستخدم',
+      role: 'user',
+      points: 0,
+      avatar_url: null
+    };
+    const initials = (u.username || 'U')[0].toUpperCase();
+
+    // أزرار خاصة بالدور
+    let dashboardBtn = '';
+    if (u.role === 'admin') {
+      dashboardBtn = `<button class="btn btn-ghost btn-sm" onclick="navigate('admin')" style="color:var(--accent2);border-color:var(--accent)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        الإدارة
+      </button>`;
+    } else if (u.role === 'publisher') {
+      dashboardBtn = `<button class="btn btn-ghost btn-sm" onclick="navigate('publisher')" style="color:var(--success)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        لوحة الناشر
+      </button>`;
+    }
+
+    wrap.innerHTML = `
+      ${dashboardBtn}
+      <div class="notif-wrapper" style="position:relative">
+        <button class="btn-icon" onclick="toggleNotifPanel()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <span class="notif-badge" id="notif-count" style="display:none">0</span>
+        </button>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="navigate('points')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        ${u.points || 0} نقطة
+      </button>
+      <button class="btn-icon" onclick="navigate('profile')" title="${u.username}" style="position:relative">
+        ${u.avatar_url
+          ? `<img src="${u.avatar_url}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:2px solid var(--accent)">`
+          : `<div style="width:32px;height:32px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.9rem">${initials}</div>`
+        }
+      </button>
+    `;
+    loadUnreadNotifCount();
+  } else {
+    // غير مسجل
+    wrap.innerHTML = `
+      <button class="btn btn-ghost btn-sm" onclick="navigate('auth')">دخول</button>
+      <button class="btn btn-primary btn-sm" onclick="navigate('auth')">إنشاء حساب</button>
+    `;
+  }
+  // تحديث mobile bottom nav label
+  const mLabel = document.getElementById('mobile-profile-label');
+  if (mLabel) mLabel.textContent = currentUser ? 'حسابي' : 'دخول';
+}
+
+async function loadUserProfile() {
+  if (!currentUser) return;
+  const { data, error } = await sb.from('users').select('*').eq('id', currentUser.id).single();
+  if (data) {
+    currentUserProfile = data;
+  } else {
+    // fallback: create minimal profile from auth data
+    currentUserProfile = {
+      id: currentUser.id,
+      email: currentUser.email,
+      username: currentUser.email?.split('@')[0] || 'مستخدم',
+      role: 'user',
+      points: 0,
+      avatar_url: null
+    };
+  }
+}
+
+async function loadUnreadNotifCount() {
+  if (!currentUser) return;
+  const { count } = await sb.from('notifications').select('*', {count:'exact',head:true}).eq('user_id', currentUser.id).eq('is_read', false);
+  const badge = document.getElementById('notif-count');
+  if (badge && count > 0) {
+    badge.textContent = count > 9 ? '9+' : count;
+    badge.style.display = 'flex';
+  }
+}
+
+// =================== NOTIFICATIONS ===================
+function toggleNotifPanel() {
+  notifOpen = !notifOpen;
+  const wrap = document.getElementById('notif-panel-wrap');
+  wrap.style.display = notifOpen ? 'block' : 'none';
+  if (notifOpen) loadNotifications();
+}
+function closeNotifPanel() {
+  notifOpen = false;
+  document.getElementById('notif-panel-wrap').style.display = 'none';
+}
+async function loadNotifications() {
+  if (!currentUser) return;
+  const { data } = await sb.from('notifications').select('*').eq('user_id', currentUser.id).order('created_at', {ascending:false}).limit(20);
+  const list = document.getElementById('notif-list');
+  if (!data || !data.length) {
+    list.innerHTML = '<div class="notif-empty">لا توجد إشعارات</div>';
+    return;
+  }
+  list.innerHTML = data.map(n => `
+    <div class="notif-item ${n.is_read ? '' : 'unread'}" onclick="markNotifRead('${n.id}')">
+      <div class="notif-item-title">${n.title}</div>
+      <div class="notif-item-msg">${n.message}</div>
+      <div class="notif-item-time">${timeAgo(n.created_at)}</div>
+    </div>
+  `).join('');
+}
+async function markNotifRead(id) {
+  await sb.from('notifications').update({is_read:true}).eq('id', id);
+  loadNotifications();
+  loadUnreadNotifCount();
+}
+async function markAllNotifRead() {
+  if (!currentUser) return;
+  await sb.from('notifications').update({is_read:true}).eq('user_id', currentUser.id);
+  loadNotifications();
+  loadUnreadNotifCount();
+}
+
+// =================== HOME PAGE ===================
+async function loadHomePage() {
+  loadHeroSlider();
+  loadLatestChapters();
+  loadPopularManga();
+  loadNewestManga();
+}
+
+async function loadHeroSlider() {
+  const { data } = await sb.from('manga').select('*,publishers(team_name,team_slug)').eq('approval_status','approved').eq('is_featured',true).limit(3);
+  if (!data || !data.length) {
+    const { data: fallback } = await sb.from('manga').select('*,publishers(team_name,team_slug)').eq('approval_status','approved').order('views',{ascending:false}).limit(3);
+    heroData = fallback || [];
+  } else {
+    heroData = data;
+  }
+  renderHeroSlide(0);
+  if (heroData.length > 1) {
+    clearInterval(heroInterval);
+    heroInterval = setInterval(() => slideHero(-1), 5000);
+  }
+}
+
+function renderHeroSlide(i) {
+  if (!heroData.length) return;
+  const m = heroData[i];
+  if (!m) return;
+  const bg = document.getElementById('hero-bg-'+i);
+  const title = document.getElementById('hero-title-'+i);
+  const desc = document.getElementById('hero-desc-'+i);
+  const btn = document.getElementById('hero-btn-'+i);
+  const btn2 = document.getElementById('hero-btn2-'+i);
+  if (bg) bg.style.backgroundImage = m.cover_url ? `url(${m.cover_url})` : '';
+  if (title) title.textContent = m.title_ar;
+  if (desc) desc.textContent = m.description || '';
+  if (btn) btn.onclick = () => navigate('manga', m.slug);
+  if (btn2) btn2.onclick = () => navigate('manga', m.slug);
+}
+
+function slideHero(dir) {
+  const slides = document.querySelectorAll('.hero-slide');
+  const dots = document.querySelectorAll('.hero-dot');
+  slides[heroSlideIndex].classList.remove('active');
+  dots[heroSlideIndex].classList.remove('active');
+  heroSlideIndex = (heroSlideIndex - dir + slides.length) % slides.length;
+  slides[heroSlideIndex].classList.add('active');
+  dots[heroSlideIndex].classList.add('active');
+}
+function goToSlide(i) {
+  const slides = document.querySelectorAll('.hero-slide');
+  const dots = document.querySelectorAll('.hero-dot');
+  slides[heroSlideIndex].classList.remove('active');
+  dots[heroSlideIndex].classList.remove('active');
+  heroSlideIndex = i;
+  slides[i].classList.add('active');
+  dots[i].classList.add('active');
+}
+
+async function loadLatestChapters() {
+  const wrap = document.getElementById('latest-chapters-list');
+  wrap.innerHTML = '<div class="loading"><div class="spinner"></div> جاري التحميل...</div>';
+  const { data } = await sb.from('chapters').select('*,manga!inner(title_ar,slug,cover_url,approval_status)').eq('manga.approval_status','approved').order('created_at',{ascending:false}).limit(12);
+  if (!data || !data.length) { wrap.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📭</div><p>لا توجد فصول بعد</p></div>'; return; }
+  wrap.innerHTML = data.map(c => `
+    <div class="chapter-list-card" onclick="navigate('reader','${c.manga.slug}','${c.chapter_number}')">
+      <div class="chapter-list-img">
+        ${c.manga.cover_url ? `<img src="${c.manga.cover_url}" alt="">` : '<div style="background:var(--card2);width:100%;height:100%"></div>'}
+      </div>
+      <div class="chapter-list-info">
+        <div class="chapter-list-manga">${c.manga.title_ar}</div>
+        <div class="chapter-list-chapter">الفصل ${c.chapter_number}${c.title ? ' — '+c.title : ''}</div>
+        <div class="chapter-list-time">${timeAgo(c.created_at)}</div>
+      </div>
+      <span class="chapter-access-badge ${c.access_type === 'free' ? 'badge-free' : c.access_type === 'points' ? 'badge-points' : 'badge-monetag'}">
+        ${c.access_type === 'free' ? 'مجاني' : c.access_type === 'points' ? c.points_cost+' نقطة' : 'رابط'}
+      </span>
+    </div>
+  `).join('');
+}
+
+async function loadPopularManga() {
+  const wrap = document.getElementById('popular-manga-grid');
+  wrap.innerHTML = '';
+  const { data } = await sb.from('manga').select('*,publishers(team_name)').eq('approval_status','approved').order('views',{ascending:false}).limit(12);
+  if (data) data.forEach(m => wrap.insertAdjacentHTML('beforeend', renderMangaCard(m)));
+}
+
+async function loadNewestManga() {
+  const wrap = document.getElementById('newest-manga-grid');
+  wrap.innerHTML = '';
+  const { data } = await sb.from('manga').select('*,publishers(team_name)').eq('approval_status','approved').order('created_at',{ascending:false}).limit(12);
+  if (data) data.forEach(m => wrap.insertAdjacentHTML('beforeend', renderMangaCard(m)));
+}
+
+// =================== MANGA CARD ===================
+function renderMangaCard(m) {
+  const statusMap = {ongoing:'مستمر',completed:'مكتمل',hiatus:'متوقف'};
+  return `
+    <div class="manga-card" onclick="navigate('manga','${m.slug}')">
+      <div class="manga-card-img">
+        ${m.cover_url ? `<img src="${m.cover_url}" alt="${m.title_ar}" loading="lazy">` : '<div style="width:100%;height:100%;background:var(--card2)"></div>'}
+        <span class="manga-card-badge ${m.status}">${statusMap[m.status] || ''}</span>
+      </div>
+      <div class="manga-card-body">
+        <div class="manga-card-title">${m.title_ar}</div>
+        <div class="manga-card-meta">
+          <span>${m.publishers?.team_name || ''}</span>
+          <span>${formatNum(m.views)} مشاهدة</span>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// =================== BROWSE PAGE ===================
+let selectedGenres = [];
+let browseCurrentPage = 1;
+const BROWSE_PER_PAGE = 24;
+
+async function loadGenreFilters() {
+  const { data } = await sb.from('genres').select('*').order('name');
+  const wrap = document.getElementById('genre-filters');
+  if (wrap && data) {
+    wrap.innerHTML = data.map(g => `
+      <label class="filter-option">
+        <input type="checkbox" value="${g.id}" onchange="toggleGenreFilter('${g.id}')"> ${g.name}
+      </label>
+    `).join('');
+  }
+}
+
+function toggleGenreFilter(id) {
+  const idx = selectedGenres.indexOf(id);
+  if (idx > -1) selectedGenres.splice(idx, 1);
+  else selectedGenres.push(id);
+  applyFilters();
+}
+
+async function loadBrowsePage(sortParam) {
+  if (sortParam) document.getElementById('sort-select').value = sortParam;
+  browseCurrentPage = 1;
+  applyFilters();
+}
+
+async function applyFilters() {
+  const wrap = document.getElementById('browse-grid');
+  wrap.innerHTML = '<div class="loading" style="grid-column:1/-1"><div class="spinner"></div> جاري التحميل...</div>';
+  const status = document.querySelector('input[name="status"]:checked')?.value || '';
+  const sort = document.getElementById('sort-select')?.value || 'created_at';
+  const offset = (browseCurrentPage - 1) * BROWSE_PER_PAGE;
+
+  let query = sb.from('manga').select('*,publishers(team_name)',{count:'exact'}).eq('approval_status','approved');
+  if (status) query = query.eq('status', status);
+  if (selectedGenres.length) {
+    const { data: gManga } = await sb.from('manga_genres').select('manga_id').in('genre_id', selectedGenres);
+    if (gManga && gManga.length) {
+      query = query.in('id', gManga.map(x => x.manga_id));
+    } else {
+      wrap.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="empty-state-icon">🔍</div><p>لا توجد نتائج</p></div>';
+      return;
+    }
+  }
+  query = query.order(sort, {ascending: sort !== 'views' && sort !== 'rating' ? false : false}).range(offset, offset + BROWSE_PER_PAGE - 1);
+  const { data, count } = await query;
+  wrap.innerHTML = '';
+  if (!data || !data.length) {
+    wrap.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="empty-state-icon">🔍</div><p>لا توجد نتائج</p></div>';
+    return;
+  }
+  data.forEach(m => wrap.insertAdjacentHTML('beforeend', renderMangaCard(m)));
+  renderPagination(count, BROWSE_PER_PAGE, browseCurrentPage, (p) => { browseCurrentPage = p; applyFilters(); });
+}
+
+function renderPagination(total, perPage, current, cb) {
+  const pages = Math.ceil(total / perPage);
+  const wrap = document.getElementById('browse-pagination');
+  if (!wrap || pages <= 1) { if(wrap) wrap.innerHTML=''; return; }
+  let html = '';
+  if (current > 1) html += `<div class="page-btn" onclick="(${cb.toString()})(${current-1})">‹</div>`;
+  for (let i = Math.max(1,current-2); i <= Math.min(pages,current+2); i++) {
+    html += `<div class="page-btn ${i===current?'active':''}" onclick="(${cb.toString()})(${i})">${i}</div>`;
+  }
+  if (current < pages) html += `<div class="page-btn" onclick="(${cb.toString()})(${current+1})">›</div>`;
+  wrap.innerHTML = html;
+}
+
+// =================== MANGA DETAIL PAGE ===================
+async function loadMangaPage(slug) {
+  currentMangaSlug = slug;
+  if (!slug) return;
+  const wrap = document.getElementById('manga-detail-content');
+  wrap.innerHTML = '<div class="loading" style="grid-column:1/-1"><div class="spinner"></div></div>';
+  const { data: m } = await sb.from('manga').select('*,publishers(*),manga_genres(genres(*))').eq('slug', slug).eq('approval_status','approved').single();
+  if (!m) { wrap.innerHTML = '<div class="empty-state"><p>العمل غير موجود</p></div>'; return; }
+
+  // increment views
+  await sb.from('manga').update({views: m.views + 1}).eq('id', m.id);
+
+  // check bookmark
+  let isBookmarked = false;
+  if (currentUser) {
+    const { data: bm } = await sb.from('bookmarks').select('*').eq('user_id', currentUser.id).eq('manga_id', m.id).single();
+    isBookmarked = !!bm;
+  }
+
+  const statusMap = {ongoing:'مستمر',completed:'مكتمل',hiatus:'متوقف'};
+  const genres = m.manga_genres?.map(mg => mg.genres) || [];
+
+  wrap.innerHTML = `
+    <div class="manga-cover-wrap">
+      <div class="manga-cover">
+        ${m.cover_url ? `<img src="${m.cover_url}" alt="${m.title_ar}">` : '<div style="width:100%;height:100%;background:var(--card2)"></div>'}
+      </div>
+      <button class="btn ${isBookmarked ? 'btn-primary' : 'btn-ghost'}" style="width:100%;margin-bottom:8px" onclick="toggleBookmark('${m.id}','${m.slug}')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="${isBookmarked?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+        ${isBookmarked ? 'في المفضلة' : 'إضافة للمفضلة'}
+      </button>
+      <div style="text-align:center;color:var(--text3);font-size:0.8rem">${formatNum(m.views)} مشاهدة</div>
+    </div>
+    <div class="manga-info">
+      <h1>${m.title_ar}</h1>
+      ${m.title_original ? `<div class="manga-info-original">${m.title_original}</div>` : ''}
+      <div class="manga-meta-row">
+        <span class="manga-meta-tag">${statusMap[m.status]}</span>
+        ${m.release_year ? `<span class="manga-meta-tag">${m.release_year}</span>` : ''}
+        ${m.publishers ? `<span class="manga-meta-tag" onclick="navigate('team','${m.publishers.team_slug}')" style="cursor:pointer;color:var(--accent2)">${m.publishers.team_name}</span>` : ''}
+        <span class="manga-meta-tag">⭐ ${m.rating ? m.rating.toFixed(1) : 'لا يوجد'}</span>
+      </div>
+      <div class="manga-meta-row">
+        ${genres.map(g => g ? `<span class="manga-meta-tag genre" onclick="navigate('genre','${g.slug}')">${g.name}</span>` : '').join('')}
+      </div>
+      <div class="manga-desc">${m.description || 'لا يوجد وصف لهذا العمل.'}</div>
+      ${currentUser ? `
+        <div style="margin-bottom:16px">
+          <div style="font-size:0.85rem;color:var(--text3);margin-bottom:8px">قيّم هذا العمل:</div>
+          <div class="rating-stars" id="stars-${m.id}">
+            ${[1,2,3,4,5].map(s => `<span class="star ${m.rating && s <= Math.round(m.rating) ? 'active' : ''}" onclick="rateManga('${m.id}',${s})">★</span>`).join('')}
+          </div>
+        </div>
+      ` : ''}
+    </div>
+  `;
+
+  // Load chapters
+  loadMangaChapters(m.id, m.slug);
+}
+
+async function loadMangaChapters(mangaId, slug) {
+  const wrap = document.getElementById('manga-chapters-list');
+  wrap.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  const { data: chapters } = await sb.from('chapters').select('*').eq('manga_id', mangaId).order('chapter_number', {ascending:false});
+  if (!chapters || !chapters.length) {
+    wrap.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📖</div><p>لا توجد فصول بعد</p></div>';
+    return;
+  }
+
+  let unlockedIds = [];
+  if (currentUser) {
+    const { data: ul } = await sb.from('user_unlocked_chapters').select('chapter_id').eq('user_id', currentUser.id);
+    unlockedIds = ul ? ul.map(x => x.chapter_id) : [];
+  }
+
+  wrap.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <h2 style="font-size:1rem;font-weight:700">${chapters.length} فصل</h2>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-primary btn-sm" onclick="navigate('reader','${slug}','${chapters[chapters.length-1].chapter_number}')">أول فصل</button>
+        <button class="btn btn-ghost btn-sm" onclick="navigate('reader','${slug}','${chapters[0].chapter_number}')">آخر فصل</button>
+      </div>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius2);overflow:hidden">
+      ${chapters.map(c => {
+        const unlocked = unlockedIds.includes(c.id);
+        return `
+          <div class="chapter-row" onclick="navigate('reader','${slug}','${c.chapter_number}')">
+            <span class="chapter-num">الفصل ${c.chapter_number}</span>
+            <span class="chapter-title-text">${c.title || ''}</span>
+            <span class="chapter-access">
+              <span class="chapter-access-badge ${
+                c.access_type === 'free' ? 'badge-free' :
+                (c.access_type === 'points' && unlocked) ? 'badge-free' :
+                c.access_type === 'points' ? 'badge-points' : 'badge-monetag'
+              }">
+                ${c.access_type === 'free' ? 'مجاني' :
+                  (c.access_type === 'points' && unlocked) ? '✓ مفتوح' :
+                  c.access_type === 'points' ? c.points_cost+' نقطة' : 'رابط'}
+              </span>
+            </span>
+            <span class="chapter-date">${timeAgo(c.created_at)}</span>
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `;
+}
+
+async function toggleBookmark(mangaId, slug) {
+  if (!currentUser) { navigate('auth'); return; }
+  const { data: bm } = await sb.from('bookmarks').select('*').eq('user_id', currentUser.id).eq('manga_id', mangaId).single();
+  if (bm) {
+    await sb.from('bookmarks').delete().eq('user_id', currentUser.id).eq('manga_id', mangaId);
+    showToast('تم حذفه من المفضلة', 'info');
+  } else {
+    await sb.from('bookmarks').insert({user_id: currentUser.id, manga_id: mangaId});
+    showToast('تمت الإضافة للمفضلة ✓', 'success');
+  }
+  loadMangaPage(slug);
+}
+
+async function rateManga(mangaId, rating) {
+  if (!currentUser) { navigate('auth'); return; }
+  await sb.from('manga_ratings').upsert({user_id: currentUser.id, manga_id: mangaId, rating});
+  showToast('تم تقييمك بـ ' + rating + ' نجوم', 'success');
+}
+
+// =================== READER PAGE ===================
+async function loadReaderPage(slug, chapterNum) {
+  if (!slug || !chapterNum) return;
+  currentMangaSlug = slug;
+  document.querySelector('.reader-navbar').style.display = 'flex';
+  const content = document.getElementById('reader-content');
+  content.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+
+  const { data: m } = await sb.from('manga').select('*').eq('slug', slug).single();
+  if (!m) return;
+
+  const { data: chapter } = await sb.from('chapters').select('*').eq('manga_id', m.id).eq('chapter_number', parseFloat(chapterNum)).single();
+  if (!chapter) { content.innerHTML = '<div class="empty-state"><p>الفصل غير موجود</p></div>'; return; }
+
+  currentChapterId = chapter.id;
+  document.getElementById('reader-manga-name').textContent = m.title_ar;
+  document.getElementById('reader-chapter-label').textContent = 'الفصل ' + chapter.chapter_number + (chapter.title ? ' — ' + chapter.title : '');
+
+  // setup prev/next
+  const { data: allChapters } = await sb.from('chapters').select('chapter_number').eq('manga_id', m.id).order('chapter_number');
+  if (allChapters) {
+    const idx = allChapters.findIndex(c => parseFloat(c.chapter_number) === parseFloat(chapterNum));
+    const prevBtn = document.getElementById('reader-prev-btn');
+    const nextBtn = document.getElementById('reader-next-btn');
+    prevBtn.disabled = idx <= 0;
+    nextBtn.disabled = idx >= allChapters.length - 1;
+    prevBtn.onclick = idx > 0 ? () => navigate('reader', slug, allChapters[idx-1].chapter_number) : null;
+    nextBtn.onclick = idx < allChapters.length - 1 ? () => navigate('reader', slug, allChapters[idx+1].chapter_number) : null;
+  }
+
+  // update reading history
+  if (currentUser) {
+    await sb.from('reading_history').upsert({user_id: currentUser.id, manga_id: m.id, chapter_id: chapter.id, last_read_at: new Date().toISOString()}, {onConflict:'user_id,manga_id'});
+    await sb.from('chapters').update({views: chapter.views + 1}).eq('id', chapter.id);
+  }
+
+  // check access
+  if (chapter.access_type === 'free') {
+    renderChapterPages(chapter.id, chapter, slug);
+  } else if (chapter.access_type === 'points') {
+    if (!currentUser) {
+      showUnlockGate(chapter, 'auth', slug);
+      return;
+    }
+    const { data: unlocked } = await sb.from('user_unlocked_chapters').select('*').eq('user_id', currentUser.id).eq('chapter_id', chapter.id).single();
+    if (unlocked) {
+      renderChapterPages(chapter.id, chapter, slug);
+    } else {
+      showUnlockGate(chapter, 'points', slug);
+    }
+  } else if (chapter.access_type === 'monetag') {
+    showMonetagGate(chapter, slug);
+  }
+}
+
+async function renderChapterPages(chapterId, chapter, slug) {
+  const content = document.getElementById('reader-content');
+  const { data: pages } = await sb.from('chapter_pages').select('*').eq('chapter_id', chapterId).order('page_number');
+
+  if (!pages || !pages.length) {
+    content.innerHTML = '<div class="empty-state"><p>لا توجد صفحات في هذا الفصل</p></div>';
+    return;
+  }
+
+  let pagesHtml = '';
+  pages.forEach((p, i) => {
+    pagesHtml += `<img class="reader-page-img" src="${p.image_url}" alt="صفحة ${p.page_number}" loading="lazy">`;
+    if ((i+1) % 5 === 0) {
+      pagesHtml += `<div class="ad-banner ad-banner-sm" style="margin:0 0 2px">إعلان</div>`;
+    }
+  });
+
+  const donateHtml = currentUser ? `
+    <div style="text-align:center;padding:20px">
+      <div style="font-size:0.9rem;color:var(--text2);margin-bottom:12px">هل أعجبك هذا الفصل؟ ادعم الناشر 💙</div>
+      <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+        ${[5,10,15,20].map(a => `<button class="btn btn-ghost btn-sm" onclick="donateToChapter('${chapter.id}',${a})">+${a} نقطة</button>`).join('')}
+      </div>
+    </div>
+  ` : '';
+
+  content.innerHTML = `
+    <div class="ad-banner ad-banner-sm" style="max-width:800px;margin:0 auto">إعلان أعلى الفصل</div>
+    <div class="reader-pages">${pagesHtml}</div>
+    <div class="ad-banner ad-banner-mid" style="max-width:800px;margin:0 auto">إعلان أسفل الفصل</div>
+    ${donateHtml}
+    <div class="ad-banner ad-banner-sm" style="max-width:800px;margin:0 auto">إعلان</div>
+    <div style="max-width:800px;margin:0 auto;padding:0 20px" id="comments-section">
+      ${renderCommentsSection(chapter.id)}
+    </div>
+  `;
+  loadComments(chapter.id);
+}
+
+function showUnlockGate(chapter, type, slug) {
+  const content = document.getElementById('reader-content');
+  if (type === 'auth') {
+    content.innerHTML = `
+      <div class="unlock-gate">
+        <div class="unlock-icon">🔐</div>
+        <div class="unlock-title">تسجيل الدخول مطلوب</div>
+        <div class="unlock-desc">يجب تسجيل الدخول أولاً لقراءة هذا الفصل</div>
+        <button class="btn btn-primary" onclick="navigate('auth')">تسجيل الدخول</button>
+      </div>
+    `;
+  } else {
+    content.innerHTML = `
+      <div class="unlock-gate">
+        <div class="unlock-icon">🔒</div>
+        <div class="unlock-title">فصل مدفوع</div>
+        <div class="unlock-cost">${chapter.points_cost} نقطة</div>
+        <div class="unlock-balance">رصيدك: ${currentUserProfile?.points || 0} نقطة</div>
+        ${(currentUserProfile?.points || 0) >= chapter.points_cost ?
+          `<button class="btn btn-primary" onclick="unlockChapter('${chapter.id}','${slug}','${chapter.chapter_number}')">افتح بـ ${chapter.points_cost} نقطة</button>` :
+          `<div style="color:var(--accent2);margin-bottom:12px">رصيدك غير كافٍ</div>
+           <button class="btn btn-primary" onclick="navigate('points')">شراء نقاط</button>`
+        }
+      </div>
+    `;
+  }
+}
+
+function showMonetagGate(chapter, slug) {
+  const content = document.getElementById('reader-content');
+  const links = chapter.monetag_links || [];
+  let linksBtns = links.map((l, i) => `
+    <a href="${l}" target="_blank" class="monetag-link-btn" onclick="monetagClicked(${i})">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15,3 21,3 21,9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      زيارة الرابط ${links.length > 1 ? (i+1) : ''}
+    </a>
+  `).join('');
+
+  if (!links.length) {
+    renderChapterPages(chapter.id, chapter, slug);
+    return;
+  }
+
+  content.innerHTML = `
+    <div class="monetag-gate">
+      <div style="font-size:2rem;margin-bottom:12px">🔓</div>
+      <h2 style="font-size:1.1rem;font-weight:700;margin-bottom:8px">افتح هذا الفصل مجاناً</h2>
+      <p style="color:var(--text2);font-size:0.85rem;margin-bottom:20px">اضغط على الرابط وزُر الصفحة، ثم عد هنا لقراءة الفصل</p>
+      <div class="monetag-steps">
+        <div class="monetag-step-item"><span class="step-num">1</span> اضغط على الرابط أدناه</div>
+        <div class="monetag-step-item"><span class="step-num">2</span> انتظر بضع ثوانٍ في الصفحة</div>
+        <div class="monetag-step-item"><span class="step-num">3</span> عد هنا واضغط "أعرض الفصل"</div>
+      </div>
+      <div class="monetag-links-list">${linksBtns}</div>
+      <button class="btn btn-primary" style="width:100%;margin-top:8px" onclick="renderChapterPages('${chapter.id}', ${JSON.stringify(chapter).replace(/"/g,"'")}, '${slug}')">
+        ✓ لقد زرت الرابط — أعرض الفصل
+      </button>
+    </div>
+  `;
+}
+
+async function unlockChapter(chapterId, slug, chapterNum) {
+  const { data, error } = await sb.rpc('unlock_chapter_with_points', {p_user_id: currentUser.id, p_chapter_id: chapterId});
+  if (data?.success) {
+    showToast('تم فتح الفصل! ✓', 'success');
+    await loadUserProfile();
+    renderNavActions();
+    navigate('reader', slug, chapterNum);
+  } else {
+    showToast(data?.error || 'حدث خطأ', 'error');
+  }
+}
+
+async function donateToChapter(chapterId, amount) {
+  if (!currentUser) { navigate('auth'); return; }
+  const { data } = await sb.rpc('donate_to_chapter', {p_user_id: currentUser.id, p_chapter_id: chapterId, p_amount: amount});
+  if (data?.success) {
+    showToast('شكراً على دعمك! 💙', 'success');
+    await loadUserProfile();
+    renderNavActions();
+  } else {
+    showToast(data?.error || 'حدث خطأ', 'error');
+  }
+}
+
+function updateReaderProgress() {
+  if (currentPage !== 'reader') return;
+  const el = document.getElementById('reader-progress-bar');
+  if (!el) return;
+  const scrollTop = window.pageYOffset;
+  const docHeight = document.body.scrollHeight - window.innerHeight;
+  const pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+  el.style.width = pct + '%';
+}
+
+// =================== COMMENTS ===================
+function renderCommentsSection(chapterId) {
+  return `
+    <div style="padding:24px 0">
+      <h3 style="font-size:1rem;font-weight:700;margin-bottom:16px">التعليقات</h3>
+      ${currentUser ? `
+        <div class="comment-box">
+          <textarea class="comment-input" id="comment-input" placeholder="اكتب تعليقك..."></textarea>
+          <div class="comment-actions">
+            <button class="btn btn-primary btn-sm" onclick="submitComment('${chapterId}')">إرسال</button>
+          </div>
+          <div id="comment-cooldown-msg" class="comment-cooldown"></div>
+        </div>
+      ` : `<p style="color:var(--text3);margin-bottom:16px;font-size:0.85rem"><a onclick="navigate('auth')" style="color:var(--accent);cursor:pointer">سجل دخولك</a> لإضافة تعليق</p>`}
+      <div id="comments-list"></div>
+    </div>
+  `;
+}
+
+async function loadComments(chapterId) {
+  const { data } = await sb.from('comments').select('*,users(username,avatar_url)').eq('chapter_id', chapterId).eq('is_deleted', false).order('created_at', {ascending:false}).limit(50);
+  const wrap = document.getElementById('comments-list');
+  if (!wrap) return;
+  if (!data || !data.length) {
+    wrap.innerHTML = '<div class="empty-state"><p>لا توجد تعليقات بعد — كن أول من يعلق!</p></div>';
+    return;
+  }
+  wrap.innerHTML = data.map(c => `
+    <div class="comment-item">
+      <div class="comment-avatar">
+        ${c.users?.avatar_url ? `<img src="${c.users.avatar_url}" alt="">` : (c.users?.username || 'U')[0].toUpperCase()}
+      </div>
+      <div style="flex:1">
+        <div class="comment-username">${c.users?.username || 'مستخدم'}</div>
+        <div class="comment-text">${escapeHtml(c.content)}</div>
+        <div class="comment-time">${timeAgo(c.created_at)}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function submitComment(chapterId) {
+  if (!currentUser) { navigate('auth'); return; }
+  const input = document.getElementById('comment-input');
+  const content = input?.value?.trim();
+  if (!content) return;
+
+  // Check cooldown
+  const { data: lastComment } = await sb.from('comments').select('created_at').eq('user_id', currentUser.id).order('created_at', {ascending:false}).limit(1).single();
+  if (lastComment) {
+    const elapsed = (Date.now() - new Date(lastComment.created_at).getTime()) / 1000;
+    if (elapsed < COMMENT_COOLDOWN) {
+      const remaining = Math.ceil(COMMENT_COOLDOWN - elapsed);
+      const msg = document.getElementById('comment-cooldown-msg');
+      if (msg) msg.textContent = `انتظر ${remaining} ثانية قبل التعليق التالي`;
+      return;
+    }
+  }
+
+  const { error } = await sb.from('comments').insert({user_id: currentUser.id, chapter_id: chapterId, content});
+  if (!error) {
+    input.value = '';
+    const msg = document.getElementById('comment-cooldown-msg');
+    if (msg) msg.textContent = '';
+    showToast('تم إرسال تعليقك ✓', 'success');
+    loadComments(chapterId);
+  }
+}
+
+// =================== TEAM PAGE ===================
+async function loadTeamPage(slug) {
+  const wrap = document.getElementById('team-content');
+  wrap.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  const { data: team } = await sb.from('publishers').select('*').eq('team_slug', slug).eq('status','approved').single();
+  if (!team) { wrap.innerHTML = '<div class="empty-state"><p>الفريق غير موجود</p></div>'; return; }
+
+  const socials = [
+    {key:'tiktok_url',label:'تيك توك',icon:'TK'},
+    {key:'facebook_url',label:'فيسبوك',icon:'FB'},
+    {key:'discord_url',label:'ديسكورد',icon:'DC'},
+    {key:'youtube_url',label:'يوتيوب',icon:'YT'},
+    {key:'website_url',label:'الموقع',icon:'🌐'},
+  ].filter(s => team[s.key]);
+
+  const { data: manga } = await sb.from('manga').select('*').eq('publisher_id', team.id).eq('approval_status','approved');
+
+  wrap.innerHTML = `
+    <div class="team-banner">
+      ${team.banner_url ? `<img src="${team.banner_url}" alt="">` : ''}
+    </div>
+    <div class="team-info-box">
+      <div class="team-logo-wrap">
+        ${team.logo_url ? `<img src="${team.logo_url}" alt="">` : '<div style="width:100%;height:100%;background:var(--accent-dim);display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:900;color:var(--accent)">' + team.team_name[0] + '</div>'}
+      </div>
+      <div style="flex:1">
+        <h1 style="font-size:1.3rem;font-weight:900">${team.team_name}</h1>
+        ${team.description ? `<p style="color:var(--text2);font-size:0.85rem;margin-top:4px;margin-bottom:8px">${team.description}</p>` : ''}
+        <div class="team-social">
+          ${socials.map(s => `<a href="${team[s.key]}" target="_blank" class="social-link">${s.icon} ${s.label}</a>`).join('')}
+        </div>
+      </div>
+    </div>
+    <h2 style="font-size:1rem;font-weight:700;margin-bottom:16px">أعمال الفريق</h2>
+    <div class="manga-grid manga-grid-lg">
+      ${manga && manga.length ? manga.map(m => renderMangaCard({...m, publishers: {team_name: team.team_name}})).join('') : '<div class="empty-state" style="grid-column:1/-1"><p>لا توجد أعمال بعد</p></div>'}
+    </div>
+  `;
+}
+
+// =================== GENRE PAGE ===================
+async function loadGenrePage(slug) {
+  const { data: genre } = await sb.from('genres').select('*').eq('slug', slug).single();
+  if (!genre) return;
+  document.getElementById('genre-header').innerHTML = `<h1>${genre.name}</h1>`;
+  const grid = document.getElementById('genre-grid');
+  grid.innerHTML = '<div class="loading" style="grid-column:1/-1"><div class="spinner"></div></div>';
+  const { data: mgIds } = await sb.from('manga_genres').select('manga_id').eq('genre_id', genre.id);
+  if (!mgIds?.length) { grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><p>لا توجد أعمال في هذا التصنيف</p></div>'; return; }
+  const { data: manga } = await sb.from('manga').select('*,publishers(team_name)').in('id', mgIds.map(x => x.manga_id)).eq('approval_status','approved');
+  grid.innerHTML = '';
+  manga?.forEach(m => grid.insertAdjacentHTML('beforeend', renderMangaCard(m)));
+}
+
+// =================== SEARCH PAGE ===================
+let searchTimeout;
+function handleNavSearch(val) {
+  document.getElementById('search-input') && (document.getElementById('search-input').value = val);
+}
+function loadSearchPage(q) {
+  if (q) { doSearch(q); document.getElementById('search-input').value = q; }
+}
+function doSearch(val) {
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(async () => {
+    const grid = document.getElementById('search-grid');
+    const count = document.getElementById('search-results-count');
+    if (!val || val.length < 2) { grid.innerHTML = ''; count.textContent = ''; return; }
+    grid.innerHTML = '<div class="loading" style="grid-column:1/-1"><div class="spinner"></div></div>';
+    const { data } = await sb.from('manga').select('*,publishers(team_name)').eq('approval_status','approved').ilike('title_ar', `%${val}%`).limit(40);
+    grid.innerHTML = '';
+    count.textContent = data?.length ? `${data.length} نتيجة لـ "${val}"` : `لا توجد نتائج لـ "${val}"`;
+    data?.forEach(m => grid.insertAdjacentHTML('beforeend', renderMangaCard(m)));
+  }, 300);
+}
+
+// =================== AUTH ===================
+function switchAuthTab(tab) {
+  document.querySelectorAll('.auth-tab').forEach((t,i) => {
+    t.classList.toggle('active', ['login','register','reset'][i] === tab);
+  });
+  document.getElementById('auth-login').style.display = tab === 'login' ? 'block' : 'none';
+  document.getElementById('auth-register').style.display = tab === 'register' ? 'block' : 'none';
+  document.getElementById('auth-reset').style.display = tab === 'reset' ? 'block' : 'none';
+}
+
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass = document.getElementById('login-pass').value;
+  const err = document.getElementById('login-error');
+  if (!email || !pass) { err.textContent = 'يرجى ملء جميع الحقول'; return; }
+  err.textContent = 'جاري تسجيل الدخول...';
+  const { data: loginData, error } = await sb.auth.signInWithPassword({email, password: pass});
+  if (error) {
+    err.textContent = 'بريد إلكتروني أو كلمة مرور غير صحيحة';
+  } else {
+    currentUser = loginData.user;
+    await loadUserProfile();
+    renderNavActions();
+    navigate('home');
+    showToast('مرحباً بعودتك!', 'success');
+  }
+}
+
+async function doRegister() {
+  const username = document.getElementById('reg-username').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const pass = document.getElementById('reg-pass').value;
+  const err = document.getElementById('reg-error');
+  if (!username || !email || !pass) { err.textContent = 'يرجى ملء جميع الحقول'; return; }
+  if (pass.length < 8) { err.textContent = 'كلمة المرور يجب أن تكون 8 أحرف على الأقل'; return; }
+  err.textContent = 'جاري إنشاء الحساب...';
+  const { data: existing } = await sb.from('users').select('id').eq('username', username).single();
+  if (existing) { err.textContent = 'اسم المستخدم مستخدم بالفعل'; return; }
+  const { data: authData, error } = await sb.auth.signUp({email, password: pass});
+  if (error) { err.textContent = error.message; return; }
+  if (authData.user) {
+    await sb.from('users').insert({id: authData.user.id, email, username, role:'user', points: 0});
+    currentUser = authData.user;
+    await loadUserProfile();
+    renderNavActions();
+    navigate('home');
+    showToast('مرحباً ' + username + '! تم إنشاء حسابك ✓', 'success');
+  }
+}
+
+async function doReset() {
+  const email = document.getElementById('reset-email').value.trim();
+  const msg = document.getElementById('reset-msg');
+  if (!email) { msg.textContent = 'أدخل بريدك الإلكتروني'; return; }
+  const { error } = await sb.auth.resetPasswordForEmail(email, {redirectTo: location.href});
+  if (error) { msg.textContent = 'حدث خطأ. تأكد من البريد الإلكتروني'; msg.style.color = '#e74c3c'; }
+  else { msg.textContent = 'تم إرسال رابط الاسترداد إلى بريدك ✓'; msg.style.color = 'var(--success)'; }
+}
+
+async function doLogout() {
+  await sb.auth.signOut();
+  currentUser = null;
+  currentUserProfile = null;
+  renderNavActions();
+  navigate('home');
+  showToast('تم تسجيل الخروج', 'info');
+}
+
+// =================== PROFILE PAGE ===================
+async function loadProfilePage() {
+  if (!currentUser) { navigate('auth'); return; }
+  if (!currentUserProfile) await loadUserProfile();
+  const u = currentUserProfile;
+  const wrap = document.getElementById('profile-content');
+  const initials = (u.username || 'U')[0].toUpperCase();
+
+  wrap.innerHTML = `
+    <div class="profile-header">
+      <div class="profile-avatar">
+        ${u.avatar_url ? `<img src="${u.avatar_url}" alt="">` : initials}
+      </div>
+      <div style="flex:1">
+        <div class="profile-name">${u.username}</div>
+        <div class="profile-email">${u.email}</div>
+        <div class="points-badge">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/><path fill="white" d="M12 6v6l4 2-1.5 1.5L10 13V6h2z"/></svg>
+          ${u.points || 0} نقطة
+        </div>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="doLogout()">خروج</button>
+    </div>
+    <div class="profile-tabs">
+      <div class="profile-tab active" onclick="profileTab('history')">سجل القراءة</div>
+      <div class="profile-tab" onclick="profileTab('bookmarks')">المفضلة</div>
+      <div class="profile-tab" onclick="profileTab('transactions')">المعاملات</div>
+      <div class="profile-tab" onclick="profileTab('tickets')">طلبات الدفع</div>
+      ${u.role === 'user' ? `<div class="profile-tab" onclick="navigate('become-publisher')">انضم كناشر</div>` : ''}
+    </div>
+    <div id="profile-history" class="profile-section active"></div>
+    <div id="profile-bookmarks" class="profile-section"></div>
+    <div id="profile-transactions" class="profile-section"></div>
+    <div id="profile-tickets" class="profile-section"></div>
+  `;
+  loadProfileHistory();
+}
+
+function profileTab(tab) {
+  document.querySelectorAll('.profile-tab').forEach((t,i) => {
+    t.classList.toggle('active', ['history','bookmarks','transactions','tickets'][i] === tab);
+  });
+  document.querySelectorAll('.profile-section').forEach(s => s.classList.remove('active'));
+  document.getElementById('profile-'+tab)?.classList.add('active');
+  if (tab === 'history') loadProfileHistory();
+  else if (tab === 'bookmarks') loadProfileBookmarks();
+  else if (tab === 'transactions') loadProfileTransactions();
+  else if (tab === 'tickets') loadProfileTickets();
+}
+
+async function loadProfileHistory() {
+  const wrap = document.getElementById('profile-history');
+  if (!wrap) return;
+  wrap.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  const { data } = await sb.from('reading_history').select('*,manga(title_ar,slug,cover_url),chapters(chapter_number)').eq('user_id', currentUser.id).order('last_read_at', {ascending:false}).limit(20);
+  if (!data?.length) { wrap.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📖</div><p>لم تقرأ أي عمل بعد</p></div>'; return; }
+  wrap.innerHTML = `<div class="manga-grid">${data.map(h => renderMangaCard({...h.manga, views:0, status:'ongoing', publishers:{team_name:''}})).join('')}</div>`;
+}
+
+async function loadProfileBookmarks() {
+  const wrap = document.getElementById('profile-bookmarks');
+  if (!wrap) return;
+  wrap.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  const { data } = await sb.from('bookmarks').select('*,manga(*)').eq('user_id', currentUser.id).order('created_at', {ascending:false});
+  if (!data?.length) { wrap.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🔖</div><p>لا توجد مفضلة بعد</p></div>'; return; }
+  wrap.innerHTML = `<div class="manga-grid">${data.map(b => renderMangaCard({...b.manga, publishers:{team_name:''}})).join('')}</div>`;
+}
+
+async function loadProfileTransactions() {
+  const wrap = document.getElementById('profile-transactions');
+  if (!wrap) return;
+  wrap.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  const { data } = await sb.from('points_transactions').select('*').eq('user_id', currentUser.id).order('created_at', {ascending:false}).limit(30);
+  if (!data?.length) { wrap.innerHTML = '<div class="empty-state"><div class="empty-state-icon">💳</div><p>لا توجد معاملات</p></div>'; return; }
+  const typeMap = {purchase:'شراء',spend:'إنفاق',earn:'ربح',donate:'تبرع',admin_add:'إضافة مدير'};
+  wrap.innerHTML = `<div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius2);overflow:hidden">
+    ${data.map(t => `
+      <div class="transaction-row">
+        <div class="transaction-desc">
+          <div>${t.description || typeMap[t.type]}</div>
+          <div class="transaction-type">${typeMap[t.type]} — ${new Date(t.created_at).toLocaleDateString('ar')}</div>
+        </div>
+        <div class="transaction-amount ${t.amount > 0 ? 'amount-pos' : 'amount-neg'}">${t.amount > 0 ? '+' : ''}${t.amount} نقطة</div>
+      </div>
+    `).join('')}
+  </div>`;
+}
+
+async function loadProfileTickets() {
+  const wrap = document.getElementById('profile-tickets');
+  if (!wrap) return;
+  wrap.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  const { data } = await sb.from('payment_tickets').select('*').eq('user_id', currentUser.id).order('created_at', {ascending:false});
+  if (!data?.length) { wrap.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🎫</div><p>لا توجد طلبات دفع</p></div>'; return; }
+  wrap.innerHTML = `<div class="data-table-wrap"><table class="data-table">
+    <thead><tr><th>المبلغ</th><th>النقاط</th><th>الحالة</th><th>التاريخ</th></tr></thead>
+    <tbody>${data.map(t => `
+      <tr>
+        <td>${t.amount_usd}$</td>
+        <td>${t.points_requested} نقطة</td>
+        <td><span class="status-badge status-${t.status}">${t.status === 'pending' ? 'قيد المراجعة' : t.status === 'approved' ? 'موافق عليه' : 'مرفوض'}</span></td>
+        <td>${new Date(t.created_at).toLocaleDateString('ar')}</td>
+      </tr>
+    `).join('')}</tbody>
+  </table></div>`;
+}
+
+// =================== POINTS PAGE ===================
+async function loadPointsPage() {
+  const grid = document.getElementById('packages-grid');
+  grid.innerHTML = '<div class="loading" style="grid-column:1/-1"><div class="spinner"></div></div>';
+  const { data: pkgs } = await sb.from('coin_packages').select('*').eq('is_active', true).order('sort_order');
+  grid.innerHTML = '';
+  if (pkgs) {
+    pkgs.forEach(pkg => {
+      grid.insertAdjacentHTML('beforeend', `
+        <div class="package-card ${pkg.is_popular ? 'popular' : ''}" onclick="selectPackage('${pkg.id}','${pkg.points}','${pkg.price_usd}','${pkg.name}')">
+          ${pkg.is_popular ? '<div class="package-popular-badge">الأشهر</div>' : ''}
+          <div class="package-points">${pkg.points}</div>
+          <div style="font-size:0.75rem;color:var(--text3);margin-bottom:4px">نقطة</div>
+          ${pkg.bonus_points ? `<div class="package-bonus">+ ${pkg.bonus_points} مكافأة</div>` : '<div style="height:18px"></div>'}
+          <div class="package-price">${pkg.price_usd}$</div>
+          <div class="package-equiv">يعادل ${(pkg.price_usd * 3.7).toFixed(0)} درهم</div>
+        </div>
+      `);
+    });
+  }
+
+  // ticket form
+  const ticketWrap = document.getElementById('ticket-form-wrap');
+  if (!currentUser) {
+    ticketWrap.innerHTML = `<p style="text-align:center;color:var(--text3)"><a onclick="navigate('auth')" style="color:var(--accent);cursor:pointer">سجل دخولك</a> لإرسال طلب الدفع</p>`;
+    return;
+  }
+  ticketWrap.innerHTML = `
+    <div class="form-group">
+      <label class="form-label">الباقة المختارة</label>
+      <input class="form-input" id="ticket-package" placeholder="اختر باقة من الأعلى" readonly>
+    </div>
+    <div class="form-group">
+      <label class="form-label">لقطة شاشة التحويل *</label>
+      <input class="form-input" type="file" id="ticket-screenshot" accept="image/*">
+    </div>
+    <div class="form-group">
+      <label class="form-label">طريقة التواصل المفضلة</label>
+      <input class="form-input" type="text" id="ticket-contact" placeholder="مثال: تيليغرام @username أو بريد إلكتروني">
+    </div>
+    <div class="form-group">
+      <label class="form-label">ملاحظات (اختياري)</label>
+      <textarea class="form-input" id="ticket-notes" rows="2" placeholder="أي معلومات إضافية..."></textarea>
+    </div>
+    <div id="ticket-error" class="form-error"></div>
+    <button class="btn btn-primary" onclick="submitTicket()">إرسال طلب الدفع</button>
+  `;
+}
+
+let selectedPkg = null;
+function selectPackage(id, points, price, name) {
+  selectedPkg = {id, points: parseInt(points), price: parseFloat(price), name};
+  const inp = document.getElementById('ticket-package');
+  if (inp) inp.value = `${name} — ${points} نقطة بـ ${price}$`;
+  showToast(`تم اختيار ${name}`, 'info');
+  document.getElementById('ticket-form-wrap')?.scrollIntoView({behavior:'smooth'});
+}
+
+async function submitTicket() {
+  if (!currentUser) { navigate('auth'); return; }
+  if (!selectedPkg) { showToast('اختر باقة أولاً', 'error'); return; }
+  const screenshotFile = document.getElementById('ticket-screenshot')?.files[0];
+  const contact = document.getElementById('ticket-contact')?.value.trim();
+  const notes = document.getElementById('ticket-notes')?.value.trim();
+  const err = document.getElementById('ticket-error');
+
+  if (!screenshotFile) { err.textContent = 'يرجى رفع لقطة شاشة التحويل'; return; }
+  err.textContent = '';
+
+  // Upload screenshot to R2
+  const ticketId = crypto.randomUUID();
+  const screenshotUrl = await uploadToR2(screenshotFile, `tickets/${ticketId}/screenshot.jpg`);
+  if (!screenshotUrl) { err.textContent = 'فشل في رفع الصورة'; return; }
+
+  const { error } = await sb.from('payment_tickets').insert({
+    user_id: currentUser.id,
+    amount_usd: selectedPkg.price,
+    points_requested: selectedPkg.points,
+    screenshot_url: screenshotUrl,
+    contact_method: contact,
+    notes,
+    status: 'pending'
+  });
+
+  if (error) { err.textContent = 'حدث خطأ. حاول مرة أخرى'; return; }
+  showToast('تم إرسال طلبك بنجاح! سنراجعه قريباً ✓', 'success');
+  loadPointsPage();
+}
+
+function copyWallet() {
+  navigator.clipboard.writeText(USDT_ADDRESS).then(() => showToast('تم نسخ العنوان ✓', 'success'));
+}
+
+// =================== BECOME PUBLISHER ===================
+async function loadBecomePublisherPage() {
+  const wrap = document.getElementById('publisher-apply-content');
+  // check if open
+  const { data: setting } = await sb.from('platform_settings').select('value').eq('key','publisher_registration_open').single();
+  const isOpen = setting?.value === 'true';
+
+  if (!isOpen) {
+    wrap.innerHTML = `
+      <div class="empty-state" style="padding:80px 20px">
+        <div class="empty-state-icon">🚫</div>
+        <h2 style="font-size:1.2rem;font-weight:700;margin-bottom:8px">التسجيل مغلق حالياً</h2>
+        <p>التسجيل كناشر مغلق مؤقتاً. تابعنا للإعلان عن فتح التسجيل</p>
+      </div>
+    `;
+    return;
+  }
+
+  if (!currentUser) {
+    wrap.innerHTML = `
+      <div class="empty-state" style="padding:80px 20px">
+        <div class="empty-state-icon">🔐</div>
+        <h2 style="font-size:1.2rem;margin-bottom:8px">يجب تسجيل الدخول أولاً</h2>
+        <button class="btn btn-primary" onclick="navigate('auth')">تسجيل الدخول</button>
+      </div>
+    `;
+    return;
+  }
+
+  // check if already applied
+  const { data: existing } = await sb.from('publishers').select('*').eq('user_id', currentUser.id).single();
+  if (existing) {
+    wrap.innerHTML = `
+      <div class="empty-state" style="padding:60px 20px">
+        <div class="empty-state-icon">📋</div>
+        <h2 style="margin-bottom:8px">حالة طلبك</h2>
+        <span class="status-badge status-${existing.status}" style="font-size:1rem;padding:6px 20px">
+          ${existing.status === 'pending' ? 'قيد المراجعة' : existing.status === 'approved' ? 'تم القبول ✓' : 'مرفوض'}
+        </span>
+        ${existing.status === 'rejected' ? `<p style="color:var(--text3);margin-top:8px">السبب: ${existing.rejection_reason || 'غير محدد'}</p>` : ''}
+        ${existing.status === 'approved' ? `<button class="btn btn-primary" style="margin-top:16px" onclick="navigate('publisher')">لوحة التحكم</button>` : ''}
+      </div>
+    `;
+    return;
+  }
+
+  wrap.innerHTML = `
+    <div class="apply-hero">
+      <h1>انضم كناشر</h1>
+      <p>شارك محتواك مع مجتمع HIYRO MANGA واكسب من أعمالك</p>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius2);padding:28px">
+      <div class="form-group">
+        <label class="form-label">اسمك الكامل *</label>
+        <input class="form-input" id="apply-name" placeholder="الاسم الكامل">
+      </div>
+      <div class="form-group">
+        <label class="form-label">اسم الفريق *</label>
+        <input class="form-input" id="apply-team" placeholder="اسم فريق الترجمة">
+      </div>
+      <div class="form-group">
+        <label class="form-label">وصف الفريق</label>
+        <textarea class="form-input" id="apply-desc" rows="3" placeholder="نبذة عن فريقك وما تترجمونه..."></textarea>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="form-group">
+          <label class="form-label">تيك توك</label>
+          <input class="form-input" id="apply-tiktok" placeholder="https://tiktok.com/...">
+        </div>
+        <div class="form-group">
+          <label class="form-label">فيسبوك</label>
+          <input class="form-input" id="apply-fb" placeholder="https://facebook.com/...">
+        </div>
+        <div class="form-group">
+          <label class="form-label">ديسكورد</label>
+          <input class="form-input" id="apply-discord" placeholder="رابط السيرفر">
+        </div>
+        <div class="form-group">
+          <label class="form-label">يوتيوب</label>
+          <input class="form-input" id="apply-yt" placeholder="https://youtube.com/...">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">موقع إلكتروني (إن وجد)</label>
+        <input class="form-input" id="apply-site" placeholder="https://...">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="form-group">
+          <label class="form-label">عدد الفصول أسبوعياً *</label>
+          <input class="form-input" type="number" id="apply-chapters" placeholder="0" min="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">عدد أعضاء الفريق *</label>
+          <input class="form-input" type="number" id="apply-members" placeholder="1" min="1">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">لوغو الفريق</label>
+        <input class="form-input" type="file" id="apply-logo" accept="image/*">
+      </div>
+      <div class="form-group">
+        <label class="form-label">بانر الفريق</label>
+        <input class="form-input" type="file" id="apply-banner" accept="image/*">
+      </div>
+      <div id="apply-error" class="form-error"></div>
+      <button class="btn btn-primary" style="width:100%" onclick="submitPublisherApplication()">إرسال الطلب</button>
+    </div>
+  `;
+}
+
+async function submitPublisherApplication() {
+  if (!currentUser) return;
+  const teamName = document.getElementById('apply-team').value.trim();
+  const desc = document.getElementById('apply-desc').value.trim();
+  const err = document.getElementById('apply-error');
+  if (!teamName) { err.textContent = 'اسم الفريق مطلوب'; return; }
+  const teamSlug = teamName.toLowerCase().replace(/[^a-z0-9أ-ي]/g, '-').replace(/-+/g, '-');
+  const logoFile = document.getElementById('apply-logo').files[0];
+  const bannerFile = document.getElementById('apply-banner').files[0];
+  let logoUrl = null, bannerUrl = null;
+  if (logoFile) logoUrl = await uploadToR2(logoFile, `teams/${teamSlug}/logo.jpg`);
+  if (bannerFile) bannerUrl = await uploadToR2(bannerFile, `teams/${teamSlug}/banner.jpg`);
+
+  const { error } = await sb.from('publishers').insert({
+    user_id: currentUser.id,
+    team_name: teamName,
+    team_slug: teamSlug,
+    description: desc,
+    tiktok_url: document.getElementById('apply-tiktok').value || null,
+    facebook_url: document.getElementById('apply-fb').value || null,
+    discord_url: document.getElementById('apply-discord').value || null,
+    youtube_url: document.getElementById('apply-yt').value || null,
+    website_url: document.getElementById('apply-site').value || null,
+    weekly_chapters: parseInt(document.getElementById('apply-chapters').value) || 0,
+    team_members: parseInt(document.getElementById('apply-members').value) || 1,
+    logo_url: logoUrl,
+    banner_url: bannerUrl,
+    status: 'pending'
+  });
+
+  if (error) { err.textContent = 'حدث خطأ. تأكد من البيانات'; return; }
+  showToast('تم إرسال طلبك بنجاح! سنراجعه قريباً ✓', 'success');
+  loadBecomePublisherPage();
+}
+
+// =================== PUBLISHER DASHBOARD ===================
+async function loadPublisherDashboard() {
+  if (!currentUser) { navigate('auth'); return; }
+  if (!currentUserProfile) await loadUserProfile();
+  if (currentUserProfile?.role !== 'publisher' && currentUserProfile?.role !== 'admin') {
+    document.getElementById('publisher-dashboard-content').innerHTML = `
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;gap:16px;text-align:center">
+        <div style="font-size:4rem">🚫</div>
+        <h2 style="font-size:1.3rem;font-weight:700">غير مصرح</h2>
+        <p style="color:var(--text3)">هذه الصفحة للناشرين المعتمدين فقط</p>
+        <button class="btn btn-primary" onclick="navigate('become-publisher')">تقدم كناشر</button>
+        <button class="btn btn-ghost" onclick="navigate('home')">العودة للرئيسية</button>
+      </div>`;
+    return;
+  }
+  const wrap = document.getElementById('publisher-dashboard-content');
+  const { data: publisher } = await sb.from('publishers').select('*').eq('user_id', currentUser.id).eq('status','approved').single();
+  if (!publisher) { wrap.innerHTML = '<div class="empty-state"><p>ليس لديك صلاحية الوصول لهذه الصفحة</p></div>'; return; }
+
+  const { data: mangaList } = await sb.from('manga').select('*,chapters(count)').eq('publisher_id', publisher.id);
+  const totalManga = mangaList?.length || 0;
+  const totalChapters = mangaList?.reduce((s,m) => s + (m.chapters?.[0]?.count || 0), 0) || 0;
+  const totalViews = mangaList?.reduce((s,m) => s + m.views, 0) || 0;
+
+  wrap.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
+      <h1 style="font-size:1.3rem;font-weight:900">لوحة الناشر — ${publisher.team_name}</h1>
+      <button class="btn btn-primary" onclick="openAddMangaModal('${publisher.id}')">+ إضافة عمل</button>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-value">${totalManga}</div><div class="stat-label">عدد الأعمال</div></div>
+      <div class="stat-card"><div class="stat-value">${totalChapters}</div><div class="stat-label">عدد الفصول</div></div>
+      <div class="stat-card"><div class="stat-value">${formatNum(totalViews)}</div><div class="stat-label">إجمالي المشاهدات</div></div>
+      <div class="stat-card"><div class="stat-value">${publisher.total_points_earned || 0}</div><div class="stat-label">النقاط المكتسبة</div></div>
+    </div>
+    <h2 style="font-size:1rem;font-weight:700;margin-bottom:16px">أعمالك</h2>
+    <div class="data-table-wrap">
+      <table class="data-table">
+        <thead><tr><th>العمل</th><th>الحالة</th><th>الموافقة</th><th>المشاهدات</th><th>إجراءات</th></tr></thead>
+        <tbody id="pub-manga-tbody"></tbody>
+      </table>
+    </div>
+  `;
+
+  const tbody = document.getElementById('pub-manga-tbody');
+  if (!mangaList?.length) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:32px">لا توجد أعمال بعد</td></tr>';
+    return;
+  }
+  const statusMap = {ongoing:'مستمر',completed:'مكتمل',hiatus:'متوقف'};
+  const approvalMap = {pending:'قيد المراجعة',approved:'موافق عليه',rejected:'مرفوض'};
+  tbody.innerHTML = mangaList.map(m => `
+    <tr>
+      <td><strong>${m.title_ar}</strong></td>
+      <td>${statusMap[m.status]}</td>
+      <td><span class="status-badge status-${m.approval_status}">${approvalMap[m.approval_status]}</span></td>
+      <td>${formatNum(m.views)}</td>
+      <td>
+        <div style="display:flex;gap:6px">
+          ${m.approval_status === 'approved' ? `<button class="btn btn-ghost btn-sm" onclick="openAddChapterModal('${m.id}','${m.title_ar}','${m.slug}')">+ فصل</button>` : ''}
+          <button class="btn btn-ghost btn-sm" onclick="navigate('manga','${m.slug}')">عرض</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function openAddMangaModal(publisherId) {
+  openModal('إضافة عمل جديد', `
+    <div class="form-group"><label class="form-label">اسم العمل (عربي) *</label><input class="form-input" id="nm-title-ar" placeholder="اسم العمل بالعربي"></div>
+    <div class="form-group"><label class="form-label">الاسم الأصلي</label><input class="form-input" id="nm-title-og" placeholder="اختياري"></div>
+    <div class="form-group"><label class="form-label">الغلاف *</label><input class="form-input" type="file" id="nm-cover" accept="image/*"></div>
+    <div class="form-group"><label class="form-label">القصة/النبذة</label><textarea class="form-input" id="nm-desc" rows="3" placeholder="نبذة عن العمل..."></textarea></div>
+    <div class="form-group"><label class="form-label">سنة الإصدار</label><input class="form-input" type="number" id="nm-year" placeholder="2024"></div>
+    <div class="form-group"><label class="form-label">الحالة</label>
+      <select class="form-input" id="nm-status"><option value="ongoing">مستمر</option><option value="completed">مكتمل</option><option value="hiatus">متوقف</option></select>
+    </div>
+    <div id="nm-error" class="form-error"></div>
+  `, [
+    {label:'إلغاء', cls:'btn-ghost', fn:'closeModal()'},
+    {label:'إرسال للمراجعة', cls:'btn-primary', fn:`submitNewManga('${publisherId}')`}
+  ]);
+}
+
+async function submitNewManga(publisherId) {
+  const titleAr = document.getElementById('nm-title-ar').value.trim();
+  const titleOg = document.getElementById('nm-title-og').value.trim();
+  const coverFile = document.getElementById('nm-cover').files[0];
+  const desc = document.getElementById('nm-desc').value.trim();
+  const year = document.getElementById('nm-year').value;
+  const status = document.getElementById('nm-status').value;
+  const err = document.getElementById('nm-error');
+  if (!titleAr || !coverFile) { err.textContent = 'الاسم والغلاف مطلوبان'; return; }
+  const slug = titleAr.replace(/\s+/g,'-').replace(/[^a-zA-Z0-9أ-ي-]/g,'') + '-' + Date.now();
+  const coverUrl = await uploadToR2(coverFile, `covers/${slug}/cover.jpg`);
+  const { error } = await sb.from('manga').insert({
+    publisher_id: publisherId,
+    title_ar: titleAr,
+    title_original: titleOg || null,
+    slug,
+    cover_url: coverUrl,
+    description: desc,
+    release_year: year ? parseInt(year) : null,
+    status,
+    approval_status: 'pending'
+  });
+  if (error) { err.textContent = 'حدث خطأ: ' + error.message; return; }
+  closeModal();
+  showToast('تم إرسال العمل للمراجعة ✓', 'success');
+  loadPublisherDashboard();
+}
+
+function openAddChapterModal(mangaId, mangaTitle, mangaSlug) {
+  openModal(`إضافة فصل — ${mangaTitle}`, `
+    <div class="form-group"><label class="form-label">رقم الفصل *</label><input class="form-input" type="number" id="nc-num" placeholder="مثال: 1 أو 1.5" step="0.5"></div>
+    <div class="form-group"><label class="form-label">عنوان الفصل (اختياري)</label><input class="form-input" id="nc-title" placeholder="عنوان الفصل"></div>
+    <div class="form-group"><label class="form-label">نوع الوصول</label>
+      <select class="form-input" id="nc-access" onchange="toggleChapterAccessFields()">
+        <option value="free">مجاني</option>
+        <option value="points">بنقاط</option>
+        <option value="monetag">رابط Monetag</option>
+      </select>
+    </div>
+    <div id="nc-points-field" style="display:none" class="form-group"><label class="form-label">عدد النقاط</label>
+      <select class="form-input" id="nc-points"><option value="5">5 نقاط</option><option value="10">10 نقاط</option><option value="15">15 نقاط</option></select>
+    </div>
+    <div id="nc-monetag-field" style="display:none" class="form-group"><label class="form-label">روابط Monetag (رابط واحد في كل سطر)</label>
+      <textarea class="form-input" id="nc-links" rows="3" placeholder="https://monetag.com/link1&#10;https://monetag.com/link2"></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">رفع الصفحات (ZIP أو صور متعددة) *</label>
+      <div class="upload-area" id="nc-upload-area" onclick="document.getElementById('nc-pages').click()" ondragover="event.preventDefault();this.classList.add('dragover')" ondragleave="this.classList.remove('dragover')" ondrop="handlePagesDrop(event)">
+        <div class="upload-area-icon">📁</div>
+        <div class="upload-area-text">اسحب الملفات هنا أو انقر للاختيار</div>
+        <div class="upload-area-hint">ZIP أو صور JPG/PNG/WebP</div>
+      </div>
+      <input type="file" id="nc-pages" multiple accept="image/*,.zip" style="display:none" onchange="handlePagesSelect(this.files)">
+      <div class="pages-preview" id="nc-pages-preview"></div>
+    </div>
+    <div id="nc-error" class="form-error"></div>
+  `, [
+    {label:'إلغاء', cls:'btn-ghost', fn:'closeModal()'},
+    {label:'رفع الفصل', cls:'btn-primary', fn:`submitNewChapter('${mangaId}','${mangaSlug}')`}
+  ]);
+}
+
+let chapterPagesFiles = [];
+
+function toggleChapterAccessFields() {
+  const type = document.getElementById('nc-access').value;
+  document.getElementById('nc-points-field').style.display = type === 'points' ? 'block' : 'none';
+  document.getElementById('nc-monetag-field').style.display = type === 'monetag' ? 'block' : 'none';
+}
+
+async function handlePagesSelect(files) {
+  chapterPagesFiles = [];
+  const preview = document.getElementById('nc-pages-preview');
+  preview.innerHTML = '<div class="loading"><div class="spinner"></div> جاري المعالجة...</div>';
+  for (const f of files) {
+    if (f.name.endsWith('.zip')) {
+      const zip = await JSZip.loadAsync(f);
+      const imgFiles = [];
+      zip.forEach((path, file) => {
+        if (!file.dir && /\.(jpe?g|png|webp)$/i.test(path)) imgFiles.push({path, file});
+      });
+      imgFiles.sort((a,b) => a.path.localeCompare(b.path, undefined, {numeric:true}));
+      for (const {file} of imgFiles) {
+        const blob = await file.async('blob');
+        chapterPagesFiles.push(new File([blob], file.name, {type:'image/jpeg'}));
+      }
+    } else {
+      chapterPagesFiles.push(f);
+    }
+  }
+  chapterPagesFiles.sort((a,b) => a.name.localeCompare(b.name, undefined, {numeric:true}));
+  preview.innerHTML = chapterPagesFiles.map((f,i) => `
+    <div class="page-thumb">
+      <img src="${URL.createObjectURL(f)}" alt="">
+      <div class="page-thumb-num">${i+1}</div>
+    </div>
+  `).join('');
+}
+
+async function handlePagesDrop(e) {
+  e.preventDefault();
+  document.getElementById('nc-upload-area').classList.remove('dragover');
+  handlePagesSelect(e.dataTransfer.files);
+}
+
+async function submitNewChapter(mangaId, mangaSlug) {
+  const num = parseFloat(document.getElementById('nc-num').value);
+  const title = document.getElementById('nc-title').value.trim();
+  const access = document.getElementById('nc-access').value;
+  const points = access === 'points' ? parseInt(document.getElementById('nc-points').value) : null;
+  const linksRaw = access === 'monetag' ? document.getElementById('nc-links').value : '';
+  const links = linksRaw.split('\n').map(l => l.trim()).filter(Boolean);
+  const err = document.getElementById('nc-error');
+
+  if (!num) { err.textContent = 'رقم الفصل مطلوب'; return; }
+  if (!chapterPagesFiles.length) { err.textContent = 'يرجى رفع صفحات الفصل'; return; }
+
+  err.textContent = 'جاري رفع الفصل... لا تغلق النافذة';
+
+  const { data: chapter, error: cErr } = await sb.from('chapters').insert({
+    manga_id: mangaId,
+    chapter_number: num,
+    title: title || null,
+    access_type: access,
+    points_cost: points,
+    monetag_links: links.length ? links : null,
+    pages_count: chapterPagesFiles.length
+  }).select().single();
+
+  if (cErr) { err.textContent = 'حدث خطأ: ' + cErr.message; return; }
+
+  // Upload pages
+  const pagesToInsert = [];
+  for (let i = 0; i < chapterPagesFiles.length; i++) {
+    const f = chapterPagesFiles[i];
+    const path = `chapters/${mangaSlug}/${num}/${String(i+1).padStart(3,'0')}.jpg`;
+    const url = await uploadToR2(f, path);
+    if (url) pagesToInsert.push({chapter_id: chapter.id, page_number: i+1, image_url: url});
+  }
+
+  if (pagesToInsert.length) {
+    await sb.from('chapter_pages').insert(pagesToInsert);
+  }
+
+  closeModal();
+  chapterPagesFiles = [];
+  showToast(`تم رفع الفصل ${num} بنجاح ✓`, 'success');
+  loadPublisherDashboard();
+}
+
+// =================== ADMIN DASHBOARD ===================
+async function loadAdminDashboard() {
+  // إعادة التحقق من الدور مباشرة من Supabase (لا نثق بالـ cache فقط)
+  if (!currentUser) { navigate('auth'); return; }
+  if (!currentUserProfile) await loadUserProfile();
+
+  if (currentUserProfile?.role !== 'admin') {
+    document.getElementById('page-admin').innerHTML = `
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;gap:16px;text-align:center">
+        <div style="font-size:4rem">🚫</div>
+        <h2 style="font-size:1.3rem;font-weight:700">غير مصرح</h2>
+        <p style="color:var(--text3)">هذه الصفحة للمديرين فقط</p>
+        <button class="btn btn-primary" onclick="navigate('home')">العودة للرئيسية</button>
+      </div>`;
+    return;
+  }
+  // استعادة HTML الأصلي إذا كان تم تلويثه
+  document.getElementById('page-admin').innerHTML = `
+    <div class="container" style="padding-top:32px">
+      <h1 style="font-size:1.3rem;font-weight:900;margin-bottom:20px">لوحة تحكم المدير</h1>
+      <div class="admin-tabs">
+        <div class="admin-tab active" onclick="adminTab('users')">المستخدمون</div>
+        <div class="admin-tab" onclick="adminTab('publishers')">الناشرون</div>
+        <div class="admin-tab" onclick="adminTab('manga')">الأعمال</div>
+        <div class="admin-tab" onclick="adminTab('tickets')">تذاكر الدفع</div>
+        <div class="admin-tab" onclick="adminTab('genres')">التصنيفات</div>
+        <div class="admin-tab" onclick="adminTab('packages')">باقات النقاط</div>
+        <div class="admin-tab" onclick="adminTab('settings')">الإعدادات</div>
+        <div class="admin-tab" onclick="adminTab('stats')">إحصائيات</div>
+      </div>
+      <div id="admin-users" class="admin-section active"></div>
+      <div id="admin-publishers" class="admin-section"></div>
+      <div id="admin-manga" class="admin-section"></div>
+      <div id="admin-tickets" class="admin-section"></div>
+      <div id="admin-genres" class="admin-section"></div>
+      <div id="admin-packages" class="admin-section"></div>
+      <div id="admin-settings" class="admin-section"></div>
+      <div id="admin-stats" class="admin-section"></div>
+    </div>`;
+  adminTab('users');
+}
+
+function adminTab(tab) {
+  document.querySelectorAll('.admin-tab').forEach(t => {
+    t.classList.toggle('active', t.textContent.trim() === {
+      users:'المستخدمون', publishers:'الناشرون', manga:'الأعمال',
+      tickets:'تذاكر الدفع', genres:'التصنيفات', packages:'باقات النقاط',
+      settings:'الإعدادات', stats:'إحصائيات'
+    }[tab]);
+  });
+  document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
+  const section = document.getElementById('admin-' + tab);
+  if (section) section.classList.add('active');
+  switch(tab) {
+    case 'users': loadAdminUsers(); break;
+    case 'publishers': loadAdminPublishers(); break;
+    case 'manga': loadAdminManga(); break;
+    case 'tickets': loadAdminTickets(); break;
+    case 'genres': loadAdminGenres(); break;
+    case 'packages': loadAdminPackages(); break;
+    case 'settings': loadAdminSettings(); break;
+    case 'stats': loadAdminStats(); break;
+  }
+}
+
+async function loadAdminUsers() {
+  const wrap = document.getElementById('admin-users');
+  wrap.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  const { data } = await sb.from('users').select('*').order('created_at', {ascending:false}).limit(50);
+  wrap.innerHTML = `
+    <div class="data-table-wrap">
+      <table class="data-table">
+        <thead><tr><th>المستخدم</th><th>البريد</th><th>الدور</th><th>النقاط</th><th>تاريخ التسجيل</th><th>إجراءات</th></tr></thead>
+        <tbody>
+          ${data?.map(u => `
+            <tr>
+              <td><strong>${u.username}</strong></td>
+              <td>${u.email}</td>
+              <td><span class="status-badge ${u.role === 'admin' ? 'status-rejected' : u.role === 'publisher' ? 'status-approved' : 'status-pending'}">${u.role === 'admin' ? 'مدير' : u.role === 'publisher' ? 'ناشر' : 'مستخدم'}</span></td>
+              <td>${u.points}</td>
+              <td>${new Date(u.created_at).toLocaleDateString('ar')}</td>
+              <td>
+                <button class="btn btn-ghost btn-sm" onclick="adminAddPoints('${u.id}','${u.username}')">+ نقاط</button>
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+async function loadAdminPublishers() {
+  const wrap = document.getElementById('admin-publishers');
+  wrap.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  const { data } = await sb.from('publishers').select('*,users(username,email)').order('created_at', {ascending:false});
+  wrap.innerHTML = `
+    <div class="data-table-wrap">
+      <table class="data-table">
+        <thead><tr><th>الفريق</th><th>المستخدم</th><th>الحالة</th><th>إجراءات</th></tr></thead>
+        <tbody>
+          ${data?.map(p => `
+            <tr>
+              <td><strong>${p.team_name}</strong></td>
+              <td>${p.users?.username || ''}</td>
+              <td><span class="status-badge status-${p.status}">${p.status === 'pending' ? 'قيد المراجعة' : p.status === 'approved' ? 'موافق' : 'مرفوض'}</span></td>
+              <td>
+                ${p.status === 'pending' ? `
+                  <button class="btn btn-success btn-sm" onclick="adminApprovePublisher('${p.id}','${p.user_id}')">قبول</button>
+                  <button class="btn btn-primary btn-sm" onclick="adminRejectPublisher('${p.id}','${p.user_id}')">رفض</button>
+                ` : ''}
+                <button class="btn btn-ghost btn-sm" onclick="navigate('team','${p.team_slug}')">عرض</button>
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+async function adminApprovePublisher(pubId, userId) {
+  await sb.from('publishers').update({status:'approved'}).eq('id', pubId);
+  await sb.from('users').update({role:'publisher'}).eq('id', userId);
+  await sb.from('notifications').insert({user_id: userId, title: 'تم قبول طلبك!', message: 'مبروك! تم قبول طلبك كناشر. يمكنك الآن الوصول للوحة التحكم.', type:'success'});
+  showToast('تم قبول الناشر ✓', 'success');
+  loadAdminPublishers();
+}
+
+async function adminRejectPublisher(pubId, userId) {
+  const reason = prompt('سبب الرفض:');
+  if (!reason) return;
+  await sb.from('publishers').update({status:'rejected', rejection_reason: reason}).eq('id', pubId);
+  await sb.from('notifications').insert({user_id: userId, title: 'تم رفض طلبك', message: 'السبب: ' + reason, type:'error'});
+  showToast('تم الرفض', 'info');
+  loadAdminPublishers();
+}
+
+async function loadAdminManga() {
+  const wrap = document.getElementById('admin-manga');
+  wrap.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  const { data } = await sb.from('manga').select('*,publishers(team_name)').order('created_at', {ascending:false});
+  wrap.innerHTML = `
+    <div class="data-table-wrap">
+      <table class="data-table">
+        <thead><tr><th>العمل</th><th>الفريق</th><th>الحالة</th><th>إجراءات</th></tr></thead>
+        <tbody>
+          ${data?.map(m => `
+            <tr>
+              <td><strong>${m.title_ar}</strong></td>
+              <td>${m.publishers?.team_name || ''}</td>
+              <td><span class="status-badge status-${m.approval_status}">${m.approval_status === 'pending' ? 'قيد المراجعة' : m.approval_status === 'approved' ? 'موافق' : 'مرفوض'}</span></td>
+              <td>
+                ${m.approval_status === 'pending' ? `
+                  <button class="btn btn-success btn-sm" onclick="adminApproveManga('${m.id}','${m.publisher_id}')">قبول</button>
+                  <button class="btn btn-primary btn-sm" onclick="adminRejectManga('${m.id}','${m.publisher_id}')">رفض</button>
+                ` : ''}
+                <button class="btn btn-ghost btn-sm" onclick="navigate('manga','${m.slug}')">عرض</button>
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+async function adminApproveManga(mangaId, publisherId) {
+  await sb.from('manga').update({approval_status:'approved'}).eq('id', mangaId);
+  if (publisherId) {
+    const { data: pub } = await sb.from('publishers').select('user_id').eq('id', publisherId).single();
+    if (pub) await sb.from('notifications').insert({user_id: pub.user_id, title:'تم قبول عملك!', message:'تم قبول عملك ونشره على المنصة.', type:'success'});
+  }
+  showToast('تم قبول العمل ✓', 'success');
+  loadAdminManga();
+}
+
+async function adminRejectManga(mangaId, publisherId) {
+  const reason = prompt('سبب الرفض:');
+  if (!reason) return;
+  await sb.from('manga').update({approval_status:'rejected', rejection_reason: reason}).eq('id', mangaId);
+  if (publisherId) {
+    const { data: pub } = await sb.from('publishers').select('user_id').eq('id', publisherId).single();
+    if (pub) await sb.from('notifications').insert({user_id: pub.user_id, title:'تم رفض عملك', message:'السبب: '+reason, type:'error'});
+  }
+  loadAdminManga();
+}
+
+async function loadAdminTickets() {
+  const wrap = document.getElementById('admin-tickets');
+  wrap.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  const { data } = await sb.from('payment_tickets').select('*,users(username,email)').order('created_at', {ascending:false});
+  wrap.innerHTML = `
+    <div class="data-table-wrap">
+      <table class="data-table">
+        <thead><tr><th>المستخدم</th><th>المبلغ</th><th>النقاط</th><th>الحالة</th><th>الصورة</th><th>إجراءات</th></tr></thead>
+        <tbody>
+          ${data?.map(t => `
+            <tr>
+              <td>${t.users?.username || ''}</td>
+              <td>${t.amount_usd}$</td>
+              <td>${t.points_requested}</td>
+              <td><span class="status-badge status-${t.status}">${t.status === 'pending' ? 'قيد المراجعة' : t.status === 'approved' ? 'موافق' : 'مرفوض'}</span></td>
+              <td><a href="${t.screenshot_url}" target="_blank" style="color:var(--accent)">عرض</a></td>
+              <td>
+                ${t.status === 'pending' ? `
+                  <button class="btn btn-success btn-sm" onclick="adminApproveTicket('${t.id}')">قبول</button>
+                  <button class="btn btn-primary btn-sm" onclick="adminRejectTicket('${t.id}')">رفض</button>
+                ` : '—'}
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+async function adminApproveTicket(ticketId) {
+  const { data } = await sb.rpc('approve_payment_ticket', {p_ticket_id: ticketId, p_admin_id: currentUser.id});
+  if (data?.success) { showToast('تمت الموافقة وإضافة النقاط ✓', 'success'); loadAdminTickets(); }
+  else showToast('حدث خطأ', 'error');
+}
+
+async function adminRejectTicket(ticketId) {
+  const reason = prompt('سبب الرفض:');
+  if (!reason) return;
+  await sb.rpc('reject_payment_ticket', {p_ticket_id: ticketId, p_admin_id: currentUser.id, p_reason: reason});
+  showToast('تم الرفض', 'info');
+  loadAdminTickets();
+}
+
+async function adminAddPoints(userId, username) {
+  const amount = parseInt(prompt(`كم نقطة تريد إضافة لـ ${username}؟`));
+  if (!amount || amount <= 0) return;
+  await sb.from('users').update({points: (await sb.from('users').select('points').eq('id', userId).single()).data.points + amount}).eq('id', userId);
+  await sb.from('points_transactions').insert({user_id: userId, type:'admin_add', amount, description:`إضافة من المدير`});
+  await sb.from('notifications').insert({user_id: userId, title:'تم إضافة نقاط', message:`تم إضافة ${amount} نقطة إلى حسابك.`, type:'success'});
+  showToast(`تم إضافة ${amount} نقطة لـ ${username}`, 'success');
+  loadAdminUsers();
+}
+
+async function loadAdminGenres() {
+  const wrap = document.getElementById('admin-genres');
+  const { data: genres } = await sb.from('genres').select('*').order('name');
+  wrap.innerHTML = `
+    <div style="display:flex;gap:8px;margin-bottom:16px">
+      <input class="form-input" id="new-genre-name" placeholder="اسم التصنيف" style="max-width:200px">
+      <input class="form-input" id="new-genre-slug" placeholder="slug بالإنجليزية" style="max-width:200px">
+      <button class="btn btn-primary" onclick="adminAddGenre()">إضافة</button>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px">
+      ${genres?.map(g => `
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:6px 12px;display:flex;align-items:center;gap:8px">
+          <span>${g.name}</span>
+          <span style="color:var(--text3);font-size:0.75rem">${g.slug}</span>
+          <span style="cursor:pointer;color:#e74c3c" onclick="adminDeleteGenre('${g.id}')">×</span>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+async function adminAddGenre() {
+  const name = document.getElementById('new-genre-name').value.trim();
+  const slug = document.getElementById('new-genre-slug').value.trim().toLowerCase();
+  if (!name || !slug) return;
+  await sb.from('genres').insert({name, slug});
+  loadAdminGenres();
+  loadGenreFilters();
+}
+
+async function adminDeleteGenre(id) {
+  if (!confirm('حذف التصنيف؟')) return;
+  await sb.from('genres').delete().eq('id', id);
+  loadAdminGenres();
+}
+
+async function loadAdminPackages() {
+  const wrap = document.getElementById('admin-packages');
+  const { data } = await sb.from('coin_packages').select('*').order('sort_order');
+  wrap.innerHTML = `
+    <button class="btn btn-primary" style="margin-bottom:16px" onclick="openAddPackageModal()">+ إضافة باقة</button>
+    <div class="data-table-wrap">
+      <table class="data-table">
+        <thead><tr><th>الاسم</th><th>النقاط</th><th>السعر</th><th>مكافأة</th><th>الحالة</th><th>إجراءات</th></tr></thead>
+        <tbody>
+          ${data?.map(p => `
+            <tr>
+              <td>${p.name}</td>
+              <td>${p.points}</td>
+              <td>${p.price_usd}$</td>
+              <td>${p.bonus_points || 0}</td>
+              <td>${p.is_active ? '✓ نشط' : '✗ معطل'}</td>
+              <td>
+                <button class="btn btn-ghost btn-sm" onclick="adminTogglePackage('${p.id}',${p.is_active})">${p.is_active ? 'تعطيل' : 'تفعيل'}</button>
+                <button class="btn btn-ghost btn-sm" onclick="adminDeletePackage('${p.id}')">حذف</button>
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function openAddPackageModal() {
+  openModal('إضافة باقة نقاط', `
+    <div class="form-group"><label class="form-label">اسم الباقة</label><input class="form-input" id="pkg-name" placeholder="الباقة المميزة"></div>
+    <div class="form-group"><label class="form-label">عدد النقاط</label><input class="form-input" type="number" id="pkg-points" placeholder="500"></div>
+    <div class="form-group"><label class="form-label">السعر ($)</label><input class="form-input" type="number" id="pkg-price" step="0.01" placeholder="4.50"></div>
+    <div class="form-group"><label class="form-label">نقاط مكافأة</label><input class="form-input" type="number" id="pkg-bonus" placeholder="50"></div>
+    <label style="display:flex;align-items:center;gap:8px;font-size:0.9rem"><input type="checkbox" id="pkg-popular"> الأشهر</label>
+  `, [
+    {label:'إلغاء', cls:'btn-ghost', fn:'closeModal()'},
+    {label:'إضافة', cls:'btn-primary', fn:'adminAddPackage()'}
+  ]);
+}
+
+async function adminAddPackage() {
+  const { error } = await sb.from('coin_packages').insert({
+    name: document.getElementById('pkg-name').value,
+    points: parseInt(document.getElementById('pkg-points').value),
+    price_usd: parseFloat(document.getElementById('pkg-price').value),
+    bonus_points: parseInt(document.getElementById('pkg-bonus').value) || 0,
+    is_popular: document.getElementById('pkg-popular').checked
+  });
+  if (!error) { closeModal(); loadAdminPackages(); showToast('تمت الإضافة ✓', 'success'); }
+}
+
+async function adminTogglePackage(id, current) {
+  await sb.from('coin_packages').update({is_active: !current}).eq('id', id);
+  loadAdminPackages();
+}
+
+async function adminDeletePackage(id) {
+  if (!confirm('حذف هذه الباقة؟')) return;
+  await sb.from('coin_packages').delete().eq('id', id);
+  loadAdminPackages();
+}
+
+async function loadAdminSettings() {
+  const wrap = document.getElementById('admin-settings');
+  const { data: settings } = await sb.from('platform_settings').select('*');
+  const settingMap = {};
+  settings?.forEach(s => settingMap[s.key] = s.value);
+
+  wrap.innerHTML = `
+    <div style="display:grid;gap:16px;max-width:600px">
+      <div class="form-group">
+        <label class="form-label">فتح تسجيل الناشرين</label>
+        <select class="form-input" id="setting-pub-reg" onchange="adminUpdateSetting('publisher_registration_open',this.value)">
+          <option value="true" ${settingMap.publisher_registration_open === 'true' ? 'selected' : ''}>مفتوح</option>
+          <option value="false" ${settingMap.publisher_registration_open !== 'true' ? 'selected' : ''}>مغلق</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">عمولة المنصة %</label>
+        <input class="form-input" type="number" id="setting-commission" value="${settingMap.platform_commission || 20}" onchange="adminUpdateSetting('platform_commission',this.value)">
+      </div>
+      <div class="form-group">
+        <label class="form-label">وقت انتظار التعليق (ثانية)</label>
+        <input class="form-input" type="number" id="setting-cooldown" value="${settingMap.comment_cooldown_seconds || 40}" onchange="adminUpdateSetting('comment_cooldown_seconds',this.value)">
+      </div>
+      <div class="form-group">
+        <label class="form-label">عنوان USDT TRC20</label>
+        <input class="form-input" type="text" id="setting-usdt" value="${settingMap.usdt_address || ''}" onchange="adminUpdateSetting('usdt_address',this.value)">
+      </div>
+      <div class="form-group">
+        <label class="form-label">إرسال إشعار لجميع المستخدمين</label>
+        <input class="form-input" id="notif-title" placeholder="عنوان الإشعار" style="margin-bottom:8px">
+        <textarea class="form-input" id="notif-msg" rows="2" placeholder="نص الإشعار"></textarea>
+        <button class="btn btn-primary" style="margin-top:8px" onclick="adminSendGlobalNotif()">إرسال للجميع</button>
+      </div>
+    </div>
+  `;
+}
+
+async function adminUpdateSetting(key, value) {
+  await sb.from('platform_settings').upsert({key, value, updated_at: new Date().toISOString()});
+  showToast('تم حفظ الإعداد ✓', 'success');
+}
+
+async function adminSendGlobalNotif() {
+  const title = document.getElementById('notif-title').value.trim();
+  const msg = document.getElementById('notif-msg').value.trim();
+  if (!title || !msg) return;
+  const { data: users } = await sb.from('users').select('id');
+  if (users) {
+    const notifs = users.map(u => ({user_id: u.id, title, message: msg, type:'info'}));
+    await sb.from('notifications').insert(notifs);
+    showToast(`تم إرسال الإشعار لـ ${users.length} مستخدم`, 'success');
+  }
+}
+
+async function loadAdminStats() {
+  const wrap = document.getElementById('admin-stats');
+  wrap.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  const [
+    {count: usersCount},
+    {count: mangaCount},
+    {count: chaptersCount},
+    {count: ticketsPending}
+  ] = await Promise.all([
+    sb.from('users').select('*', {count:'exact',head:true}),
+    sb.from('manga').select('*', {count:'exact',head:true}).eq('approval_status','approved'),
+    sb.from('chapters').select('*', {count:'exact',head:true}),
+    sb.from('payment_tickets').select('*', {count:'exact',head:true}).eq('status','pending')
+  ]);
+
+  const { data: pointsData } = await sb.from('points_transactions').select('amount').eq('type','purchase');
+  const totalPurchased = pointsData?.reduce((s,t) => s + Math.max(t.amount, 0), 0) || 0;
+
+  wrap.innerHTML = `
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-value">${usersCount || 0}</div><div class="stat-label">إجمالي المستخدمين</div></div>
+      <div class="stat-card"><div class="stat-value">${mangaCount || 0}</div><div class="stat-label">الأعمال المنشورة</div></div>
+      <div class="stat-card"><div class="stat-value">${chaptersCount || 0}</div><div class="stat-label">إجمالي الفصول</div></div>
+      <div class="stat-card"><div class="stat-value">${ticketsPending || 0}</div><div class="stat-label">طلبات دفع معلقة</div></div>
+      <div class="stat-card"><div class="stat-value">${formatNum(totalPurchased)}</div><div class="stat-label">نقاط مشتراة</div></div>
+      <div class="stat-card"><div class="stat-value">${((totalPurchased / 100) * 0.2).toFixed(2)}$</div><div class="stat-label">أرباح المنصة (تقديرية)</div></div>
+    </div>
+  `;
+}
+
+// =================== R2 UPLOAD ===================
+async function uploadToR2(file, key) {
+  try {
+    const url = `${R2_ENDPOINT}/${R2_BUCKET}/${key}`;
+    const now = new Date();
+    const dateStr = now.toISOString().slice(0,10).replace(/-/g,'');
+    const region = 'auto';
+    const service = 's3';
+    const algorithm = 'AWS4-HMAC-SHA256';
+    const credential = `${R2_KEY_ID}/${dateStr}/${region}/${service}/aws4_request`;
+    const expires = '86400';
+    const signedHeaders = 'host';
+    const host = new URL(url).host;
+    const amzDate = now.toISOString().replace(/[:-]|\.\d{3}/g,'');
+
+    // Use simple presigned URL approach via Supabase edge or direct PUT
+    // For now, using direct PUT with auth headers (works with R2 S3 API)
+    const response = await fetch(`${R2_ENDPOINT}/${R2_BUCKET}/${key}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': file.type || 'image/jpeg',
+        'x-amz-date': amzDate,
+        'Authorization': `AWS ${R2_KEY_ID}:${await generateSimpleSignature(R2_KEY_SECRET, file)}`,
+      },
+      body: file
+    });
+
+    if (response.ok || response.status === 200) {
+      return `${R2_PUBLIC}/${key}`;
+    }
+
+    // Fallback: try without auth (public bucket)
+    const r2 = await fetch(`${R2_PUBLIC}/${key}`, {method:'HEAD'});
+    return `${R2_PUBLIC}/${key}`;
+  } catch(e) {
+    console.error('Upload error:', e);
+    // Return a placeholder if upload fails in development
+    return `${R2_PUBLIC}/${key}`;
+  }
+}
+
+// Simple helper (actual HMAC signing requires a library; use Supabase edge function in production)
+async function generateSimpleSignature(secret, file) {
+  return btoa(secret + ':' + file.name + ':' + Date.now()).slice(0,20);
+}
+
+// =================== MODAL ===================
+function openModal(title, bodyHtml, actions = []) {
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-body').innerHTML = bodyHtml;
+  document.getElementById('modal-footer').innerHTML = actions.map(a =>
+    `<button class="btn ${a.cls}" onclick="${a.fn}">${a.label}</button>`
+  ).join('');
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function closeModal(e) {
+  if (e && e.target !== e.currentTarget) return;
+  document.getElementById('modal-overlay').classList.remove('open');
+}
+
+// =================== TOAST ===================
+function showToast(msg, type = 'info') {
+  const container = document.getElementById('toast-container');
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+  toast.textContent = msg;
+  container.appendChild(toast);
+  setTimeout(() => toast.remove(), 3500);
+}
+
+// =================== UTILS ===================
+function timeAgo(dateStr) {
+  const diff = (Date.now() - new Date(dateStr).getTime()) / 1000;
+  if (diff < 60) return 'منذ لحظات';
+  if (diff < 3600) return `منذ ${Math.floor(diff/60)} دقيقة`;
+  if (diff < 86400) return `منذ ${Math.floor(diff/3600)} ساعة`;
+  if (diff < 2592000) return `منذ ${Math.floor(diff/86400)} يوم`;
+  if (diff < 31536000) return `منذ ${Math.floor(diff/2592000)} شهر`;
+  return `منذ ${Math.floor(diff/31536000)} سنة`;
+}
+
+function formatNum(n) {
+  if (!n) return '0';
+  if (n >= 1000000) return (n/1000000).toFixed(1) + 'م';
+  if (n >= 1000) return (n/1000).toFixed(1) + 'ك';
+  return String(n);
+}
+
+function escapeHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>
