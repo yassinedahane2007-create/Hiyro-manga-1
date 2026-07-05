@@ -11,25 +11,28 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
 :root {
-  --bg: #0f0f0f;
-  --bg2: #141414;
-  --card: #1a1a1a;
-  --card2: #202020;
-  --border: #2a2a2a;
-  --border2: #333;
-  --accent: #c0392b;
-  --accent2: #e74c3c;
-  --accent-dim: rgba(192,57,43,0.15);
-  --text: #e8e8e8;
-  --text2: #a0a0a0;
-  --text3: #666;
-  --success: #27ae60;
-  --warning: #e67e22;
-  --info: #2980b9;
+  --bg: #0d0d12;
+  --bg2: #12121a;
+  --card: #16161f;
+  --card2: #1c1c28;
+  --border: #252535;
+  --border2: #32324a;
+  --accent: #7c3aed;
+  --accent2: #9d5cf6;
+  --accent-dim: rgba(124,58,237,0.15);
+  --accent-glow: rgba(124,58,237,0.3);
+  --text: #eeeef5;
+  --text2: #9898b8;
+  --text3: #55556a;
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --info: #3b82f6;
+  --danger: #ef4444;
   --font: 'Cairo', 'Noto Naskh Arabic', sans-serif;
   --radius: 8px;
   --radius2: 12px;
-  --shadow: 0 4px 20px rgba(0,0,0,0.5);
+  --shadow: 0 8px 32px rgba(0,0,0,0.6);
+  --shadow-accent: 0 4px 20px rgba(124,58,237,0.25);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
@@ -92,8 +95,8 @@ input,textarea,select{font-family:var(--font);outline:none}
   border-radius:var(--radius);font-size:0.875rem;font-weight:600;
   transition:all .2s;cursor:pointer;
 }
-.btn-primary{background:var(--accent);color:#fff}
-.btn-primary:hover{background:var(--accent2)}
+.btn-primary{background:var(--accent);color:#fff;box-shadow:0 2px 8px var(--accent-glow)}
+.btn-primary:hover{background:var(--accent2);box-shadow:0 4px 16px var(--accent-glow)}
 .btn-ghost{background:var(--card);color:var(--text2);border:1px solid var(--border)}
 .btn-ghost:hover{color:var(--text);border-color:var(--border2)}
 .btn-success{background:var(--success);color:#fff}
@@ -126,9 +129,15 @@ input,textarea,select{font-family:var(--font);outline:none}
 }
 .hero-slide.active{opacity:1}
 .hero-bg{
-  position:absolute;inset:0;background-size:cover;background-position:center;
-  filter:brightness(0.4);
+  position:absolute;inset:0;background-size:cover;background-position:center top;
+  filter:brightness(0.35);
 }
+.hero::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(to top, rgba(13,13,18,0.98) 0%, rgba(13,13,18,0.5) 50%, transparent 100%);
+  pointer-events:none;z-index:1;
+}
+.hero-content{z-index:2}
 .hero-content{
   position:relative;z-index:2;padding:40px;max-width:600px;
 }
@@ -184,7 +193,8 @@ input,textarea,select{font-family:var(--font);outline:none}
 }
 .section-title::before{
   content:'';display:block;width:4px;height:20px;
-  background:var(--accent);border-radius:2px;
+  background:linear-gradient(180deg,var(--accent2),var(--accent));
+  border-radius:2px;box-shadow:0 0 8px var(--accent-glow);
 }
 .section-link{color:var(--text3);font-size:0.85rem}
 .section-link:hover{color:var(--accent)}
@@ -202,7 +212,7 @@ input,textarea,select{font-family:var(--font);outline:none}
   background:var(--card);border-radius:var(--radius2);overflow:hidden;
   border:1px solid var(--border);transition:all .2s;cursor:pointer;
 }
-.manga-card:hover{border-color:var(--accent);transform:translateY(-4px);box-shadow:var(--shadow)}
+.manga-card:hover{border-color:var(--accent);transform:translateY(-4px);box-shadow:0 8px 24px rgba(124,58,237,0.2)}
 .manga-card-img{
   aspect-ratio:2/3;overflow:hidden;position:relative;background:var(--card2);
 }
@@ -492,9 +502,9 @@ input,textarea,select{font-family:var(--font);outline:none}
   display:inline-block;padding:2px 10px;border-radius:4px;
   font-size:0.75rem;font-weight:600;
 }
-.status-pending{background:rgba(230,126,34,0.15);color:var(--warning)}
-.status-approved{background:rgba(39,174,96,0.15);color:var(--success)}
-.status-rejected{background:rgba(231,76,60,0.15);color:#e74c3c}
+.status-pending{background:rgba(245,158,11,0.12);color:var(--warning);border:1px solid rgba(245,158,11,0.25)}
+.status-approved{background:rgba(34,197,94,0.12);color:var(--success);border:1px solid rgba(34,197,94,0.25)}
+.status-rejected{background:rgba(239,68,68,0.12);color:var(--danger);border:1px solid rgba(239,68,68,0.25)}
 
 /* ===================== MODAL ===================== */
 .modal-overlay{
@@ -739,9 +749,10 @@ input,textarea,select{font-family:var(--font);outline:none}
   padding:60px;color:var(--text3);font-size:0.9rem;gap:10px;
 }
 .spinner{
-  width:20px;height:20px;border:2px solid var(--border);
+  width:24px;height:24px;border:3px solid var(--border2);
   border-top-color:var(--accent);border-radius:50%;
   animation:spin .7s linear infinite;
+  box-shadow:0 0 12px var(--accent-glow);
 }
 @keyframes spin{to{transform:rotate(360deg)}}
 .skeleton{
@@ -903,7 +914,7 @@ footer{
 <!-- HOME PAGE -->
 <div class="page active" id="page-home">
   <!-- AD TOP -->
-  <div class="container"><div class="ad-banner ad-banner-sm" style="margin-top:16px"><span>إعلان — Adsterra / A-ads</span></div></div>
+  <div class="container"><div class="ad-banner ad-banner-sm" id="ad-top-banner" style="margin-top:16px"><span style="color:var(--text3);font-size:0.75rem">إعلان</span></div></div>
   <!-- HERO SLIDER -->
   <div class="hero" id="hero-slider">
     <div class="hero-slide active" id="hero-slide-0">
@@ -955,7 +966,7 @@ footer{
     </div>
   </div>
   <!-- AD MID 1 -->
-  <div class="container"><div class="ad-banner ad-banner-mid">إعلان</div></div>
+  <div class="container"><div class="ad-banner ad-banner-mid" id="ad-mid-1"><span style="color:var(--text3);font-size:0.75rem">إعلان</span></div></div>
   <!-- LATEST CHAPTERS -->
   <div class="container">
     <div class="section">
@@ -967,7 +978,7 @@ footer{
     </div>
   </div>
   <!-- AD MID 2 -->
-  <div class="container"><div class="ad-banner ad-banner-mid">إعلان</div></div>
+  <div class="container"><div class="ad-banner ad-banner-mid" id="ad-mid-2"><span style="color:var(--text3);font-size:0.75rem">إعلان</span></div></div>
   <!-- POPULAR MANGA -->
   <div class="container">
     <div class="section">
@@ -979,7 +990,7 @@ footer{
     </div>
   </div>
   <!-- AD MID 3 -->
-  <div class="container"><div class="ad-banner ad-banner-mid">إعلان</div></div>
+  <div class="container"><div class="ad-banner ad-banner-mid" id="ad-mid-3"><span style="color:var(--text3);font-size:0.75rem">إعلان</span></div></div>
   <!-- NEWEST MANGA -->
   <div class="container">
     <div class="section">
@@ -991,7 +1002,7 @@ footer{
     </div>
   </div>
   <!-- AD BOTTOM -->
-  <div class="container"><div class="ad-banner ad-banner-top">إعلان سفلي</div></div>
+  <div class="container"><div class="ad-banner ad-banner-top" id="ad-bottom-banner"><span style="color:var(--text3);font-size:0.75rem">إعلان</span></div></div>
 </div>
 
 <!-- BROWSE PAGE -->
@@ -1244,7 +1255,7 @@ footer{
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
       <span>نقاط</span>
     </button>
-    <button id="mobile-profile-btn" onclick="currentUser ? navigate('profile') : navigate('auth')" class="mobile-nav-btn" data-page="profile">
+    <button id="mobile-profile-btn" onclick="mobileProfileTap()" class="mobile-nav-btn" data-page="profile">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
       <span id="mobile-profile-label">دخول</span>
     </button>
@@ -1361,9 +1372,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   loadGenreFilters();
-  routeFromHash();
+  // hashchange listener
   window.addEventListener('hashchange', routeFromHash);
   window.addEventListener('scroll', updateReaderProgress);
+  // route الصفحة الحالية - مع تأخير بسيط لضمان تحميل الـ DOM كاملاً
+  setTimeout(routeFromHash, 0);
   document.addEventListener('click', (e) => {
     if (notifOpen && !e.target.closest('#notif-panel-wrap') && !e.target.closest('[onclick*="toggleNotif"]')) {
       closeNotifPanel();
@@ -1373,69 +1386,88 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // =================== ROUTING ===================
 function routeFromHash() {
-  const hash = location.hash.replace('#','') || 'home';
-  const parts = hash.split('/');
-  navigate(parts[0], parts[1], parts[2], false);
+  const raw = location.hash.replace(/^#\/?/, '') || 'home';
+  const parts = raw.split('/');
+  _doNavigate(parts[0], parts[1], parts[2]);
 }
 
-function updateMobileNav(page) {
+// navigate: يغير الـ hash أو ينفذ مباشرة
+function navigate(page, param1, param2) {
+  let hashVal = page;
+  if (param1) hashVal += '/' + param1;
+  if (param2) hashVal += '/' + param2;
+  const newHash = '#' + hashVal;
+  const curHash = location.hash || '#home';
+  if (curHash === newHash || curHash === newHash + '/') {
+    // نفس الصفحة - نفذ مباشرة
+    _doNavigate(page, param1, param2);
+  } else {
+    location.hash = newHash;
+    // بعض المتصفحات لا تُطلق hashchange فوراً
+    setTimeout(() => {
+      if ((location.hash || '#home') === newHash) {
+        _doNavigate(page, param1, param2);
+      }
+    }, 50);
+  }
+}
+
+// _doNavigate: التنفيذ الفعلي بعد تغيير الـ hash
+function _doNavigate(page, param1, param2) {
+  // حماية الصفحات المقيدة
+  if ((page === 'admin' || page === 'publisher') && !currentUser) {
+    page = 'auth'; param1 = undefined; param2 = undefined;
+  }
+  if (page === 'auth' && currentUser) {
+    page = 'home'; param1 = undefined; param2 = undefined;
+  }
+
+  // إظهار الصفحة الصحيحة
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const el = document.getElementById('page-' + page);
+  if (el) { el.classList.add('active'); currentPage = page; }
+  window.scrollTo(0, 0);
+
+  // reader navbar
+  const readerNav = document.querySelector('.reader-navbar');
+  if (readerNav) readerNav.style.display = page === 'reader' ? 'flex' : 'none';
+
+  // desktop nav active
+  document.querySelectorAll('.nav-link').forEach(l => {
+    l.classList.toggle('active', l.dataset.page === page);
+  });
+
+  // mobile bottom nav
   document.querySelectorAll('.mobile-nav-btn').forEach(b => {
     b.classList.toggle('active', b.dataset.page === page);
   });
-  // تحديث label البروفايل
-  const label = document.getElementById('mobile-profile-label');
-  if (label) label.textContent = currentUser ? 'حسابي' : 'دخول';
-  // إخفاء الـ mobile nav في صفحة القراءة
   const mobileNav = document.getElementById('mobile-nav');
   if (mobileNav) mobileNav.style.display = page === 'reader' ? 'none' : '';
+  const mLabel = document.getElementById('mobile-profile-label');
+  if (mLabel) mLabel.textContent = currentUser ? 'حسابي' : 'دخول';
+
+  // تحميل الصفحة
+  switch(page) {
+    case 'home':             loadHomePage(); break;
+    case 'browse':           loadBrowsePage(param1); break;
+    case 'manga':            loadMangaPage(param1); break;
+    case 'reader':           loadReaderPage(param1, param2); break;
+    case 'team':             loadTeamPage(param1); break;
+    case 'genre':            loadGenrePage(param1); break;
+    case 'search':           loadSearchPage(param1); break;
+    case 'auth':             break;
+    case 'profile':          loadProfilePage(); break;
+    case 'points':           loadPointsPage(); break;
+    case 'become-publisher': loadBecomePublisherPage(); break;
+    case 'publisher':        loadPublisherDashboard(); break;
+    case 'admin':            loadAdminDashboard(); break;
+  }
 }
 
-function navigate(page, param1, param2, pushHistory = true) {
-  if (pushHistory) {
-    let hash = page;
-    if (param1) hash += '/' + param1;
-    if (param2) hash += '/' + param2;
-    location.hash = hash;
-    return;
-  }
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  const el = document.getElementById('page-' + page);
-  if (el) {
-    el.classList.add('active');
-    currentPage = page;
-    window.scrollTo(0, 0);
-  }
-  // hide reader navbar except on reader
-  document.querySelector('.reader-navbar').style.display = page === 'reader' ? 'flex' : 'none';
-  // تحديث active state للـ nav links
-  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-  const activeLink = document.querySelector(`.nav-link[data-page="${page}"]`);
-  if (activeLink) activeLink.classList.add('active');
-  // تحديث mobile nav
-  updateMobileNav(page);
-
-  switch(page) {
-    case 'home': loadHomePage(); break;
-    case 'browse': loadBrowsePage(param1); break;
-    case 'manga': loadMangaPage(param1); break;
-    case 'reader': loadReaderPage(param1, param2); break;
-    case 'team': loadTeamPage(param1); break;
-    case 'genre': loadGenrePage(param1); break;
-    case 'search': loadSearchPage(param1); break;
-    case 'auth':
-      // إذا مسجل دخول - لا نريه صفحة الدخول
-      if (currentUser) { navigate('home'); return; }
-      break;
-    case 'profile': loadProfilePage(); break;
-    case 'points': loadPointsPage(); break;
-    case 'become-publisher': loadBecomePublisherPage(); break;
-    case 'publisher':
-      if (!currentUser) { navigate('auth'); return; }
-      loadPublisherDashboard(); break;
-    case 'admin':
-      if (!currentUser) { navigate('auth'); return; }
-      loadAdminDashboard(); break;
-  }
+// =================== MOBILE HELPERS ===================
+function mobileProfileTap() {
+  if (currentUser) navigate('profile');
+  else navigate('auth');
 }
 
 // =================== NAV ACTIONS ===================
@@ -1494,9 +1526,12 @@ function renderNavActions() {
       <button class="btn btn-primary btn-sm" onclick="navigate('auth')">إنشاء حساب</button>
     `;
   }
-  // تحديث mobile bottom nav label
+  // تحديث mobile bottom nav
   const mLabel = document.getElementById('mobile-profile-label');
   if (mLabel) mLabel.textContent = currentUser ? 'حسابي' : 'دخول';
+  document.querySelectorAll('.mobile-nav-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.page === currentPage);
+  });
 }
 
 async function loadUserProfile() {
@@ -1566,8 +1601,42 @@ async function markAllNotifRead() {
   loadUnreadNotifCount();
 }
 
+// =================== ADS SYSTEM ===================
+let adsCache = {};
+async function loadAds() {
+  if (Object.keys(adsCache).length) return adsCache;
+  const { data } = await sb.from('platform_settings').select('key,value').like('key','ad_%');
+  data?.forEach(s => { adsCache[s.key] = s.value; });
+  return adsCache;
+}
+
+function renderAd(slotKey, containerId) {
+  const code = adsCache[slotKey];
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  if (code && code.trim()) {
+    el.innerHTML = code;
+    // تنفيذ السكريبتات
+    el.querySelectorAll('script').forEach(oldScript => {
+      const newScript = document.createElement('script');
+      [...oldScript.attributes].forEach(a => newScript.setAttribute(a.name, a.value));
+      newScript.textContent = oldScript.textContent;
+      oldScript.parentNode.replaceChild(newScript, oldScript);
+    });
+    el.style.background = 'transparent';
+    el.style.border = 'none';
+  } else {
+    el.innerHTML = '<span style="color:var(--text3);font-size:0.75rem">إعلان</span>';
+  }
+}
+
 // =================== HOME PAGE ===================
 async function loadHomePage() {
+  await loadAds();
+  renderAd('ad_top_banner', 'ad-top-banner');
+  renderAd('ad_mid_1', 'ad-mid-1');
+  renderAd('ad_mid_2', 'ad-mid-2');
+  renderAd('ad_bottom', 'ad-bottom-banner');
   loadHeroSlider();
   loadLatestChapters();
   loadPopularManga();
@@ -1758,8 +1827,16 @@ async function loadMangaPage(slug) {
   if (!slug) return;
   const wrap = document.getElementById('manga-detail-content');
   wrap.innerHTML = '<div class="loading" style="grid-column:1/-1"><div class="spinner"></div></div>';
-  const { data: m } = await sb.from('manga').select('*,publishers(*),manga_genres(genres(*))').eq('slug', slug).eq('approval_status','approved').single();
+  const { data: m } = await sb.from('manga').select('*,publishers(*),manga_genres(genres(*))').eq('slug', slug).single();
   if (!m) { wrap.innerHTML = '<div class="empty-state"><p>العمل غير موجود</p></div>'; return; }
+  // إذا كان غير مقبول — نسمح فقط للناشر والأدمن بالرؤية
+  if (m.approval_status !== 'approved') {
+    const isOwner = m.publishers?.user_id === currentUser?.id;
+    const isAdmin = currentUserProfile?.role === 'admin';
+    if (!isOwner && !isAdmin) {
+      wrap.innerHTML = '<div class="empty-state"><p>هذا العمل قيد المراجعة</p></div>'; return;
+    }
+  }
 
   // increment views
   await sb.from('manga').update({views: m.views + 1}).eq('id', m.id);
@@ -2695,20 +2772,38 @@ async function loadPublisherDashboard() {
   `).join('');
 }
 
-function openAddMangaModal(publisherId) {
+async function openAddMangaModal(publisherId) {
+  // جلب التصنيفات
+  const { data: genres } = await sb.from('genres').select('*').order('name');
+  const genreCheckboxes = genres ? genres.map(g =>
+    `<label style="display:flex;align-items:center;gap:6px;padding:4px 0;font-size:0.82rem;cursor:pointer">
+      <input type="checkbox" value="${g.id}" name="nm-genre" style="accent-color:var(--accent)"> ${g.name}
+    </label>`
+  ).join('') : '';
+
   openModal('إضافة عمل جديد', `
     <div class="form-group"><label class="form-label">اسم العمل (عربي) *</label><input class="form-input" id="nm-title-ar" placeholder="اسم العمل بالعربي"></div>
     <div class="form-group"><label class="form-label">الاسم الأصلي</label><input class="form-input" id="nm-title-og" placeholder="اختياري"></div>
     <div class="form-group"><label class="form-label">الغلاف *</label><input class="form-input" type="file" id="nm-cover" accept="image/*"></div>
     <div class="form-group"><label class="form-label">القصة/النبذة</label><textarea class="form-input" id="nm-desc" rows="3" placeholder="نبذة عن العمل..."></textarea></div>
-    <div class="form-group"><label class="form-label">سنة الإصدار</label><input class="form-input" type="number" id="nm-year" placeholder="2024"></div>
+    <div class="form-group"><label class="form-label">سنة الإصدار</label><input class="form-input" type="number" id="nm-year" placeholder="2025"></div>
     <div class="form-group"><label class="form-label">الحالة</label>
-      <select class="form-input" id="nm-status"><option value="ongoing">مستمر</option><option value="completed">مكتمل</option><option value="hiatus">متوقف</option></select>
+      <select class="form-input" id="nm-status">
+        <option value="ongoing">مستمر</option>
+        <option value="completed">مكتمل</option>
+        <option value="hiatus">متوقف</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">التصنيفات</label>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:var(--card2);border:1px solid var(--border);border-radius:var(--radius);padding:10px;max-height:160px;overflow-y:auto">
+        ${genreCheckboxes}
+      </div>
     </div>
     <div id="nm-error" class="form-error"></div>
   `, [
     {label:'إلغاء', cls:'btn-ghost', fn:'closeModal()'},
-    {label:'إرسال للمراجعة', cls:'btn-primary', fn:`submitNewManga('${publisherId}')`}
+    {label:'إرسال للمراجعة', cls:'btn-primary', fn:\`submitNewManga('\${publisherId}')\`}
   ]);
 }
 
@@ -2720,10 +2815,14 @@ async function submitNewManga(publisherId) {
   const year = document.getElementById('nm-year').value;
   const status = document.getElementById('nm-status').value;
   const err = document.getElementById('nm-error');
-  if (!titleAr || !coverFile) { err.textContent = 'الاسم والغلاف مطلوبان'; return; }
-  const slug = titleAr.replace(/\s+/g,'-').replace(/[^a-zA-Z0-9أ-ي-]/g,'') + '-' + Date.now();
-  const coverUrl = await uploadToR2(coverFile, `covers/${slug}/cover.jpg`);
-  const { error } = await sb.from('manga').insert({
+  if (!titleAr) { err.textContent = 'اسم العمل مطلوب'; return; }
+  if (!coverFile) { err.textContent = 'الغلاف مطلوب'; return; }
+  err.textContent = 'جاري رفع الغلاف...';
+
+  const slug = titleAr.replace(/\s+/g,'-').replace(/[^a-zA-Z0-9\u0600-\u06FF-]/g,'').slice(0,40) + '-' + Date.now();
+  const coverUrl = await uploadToR2(coverFile, 'covers/' + slug + '/cover.jpg');
+
+  const { data: manga, error } = await sb.from('manga').insert({
     publisher_id: publisherId,
     title_ar: titleAr,
     title_original: titleOg || null,
@@ -2733,8 +2832,16 @@ async function submitNewManga(publisherId) {
     release_year: year ? parseInt(year) : null,
     status,
     approval_status: 'pending'
-  });
+  }).select().single();
+
   if (error) { err.textContent = 'حدث خطأ: ' + error.message; return; }
+
+  // حفظ التصنيفات
+  const selectedGenres = [...document.querySelectorAll('input[name="nm-genre"]:checked')].map(i => i.value);
+  if (selectedGenres.length && manga) {
+    await sb.from('manga_genres').insert(selectedGenres.map(gid => ({manga_id: manga.id, genre_id: gid})));
+  }
+
   closeModal();
   showToast('تم إرسال العمل للمراجعة ✓', 'success');
   loadPublisherDashboard();
@@ -2958,29 +3065,55 @@ async function loadAdminPublishers() {
   const wrap = document.getElementById('admin-publishers');
   wrap.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
   const { data } = await sb.from('publishers').select('*,users(username,email)').order('created_at', {ascending:false});
-  wrap.innerHTML = `
-    <div class="data-table-wrap">
-      <table class="data-table">
-        <thead><tr><th>الفريق</th><th>المستخدم</th><th>الحالة</th><th>إجراءات</th></tr></thead>
-        <tbody>
-          ${data?.map(p => `
-            <tr>
-              <td><strong>${p.team_name}</strong></td>
-              <td>${p.users?.username || ''}</td>
-              <td><span class="status-badge status-${p.status}">${p.status === 'pending' ? 'قيد المراجعة' : p.status === 'approved' ? 'موافق' : 'مرفوض'}</span></td>
-              <td>
-                ${p.status === 'pending' ? `
-                  <button class="btn btn-success btn-sm" onclick="adminApprovePublisher('${p.id}','${p.user_id}')">قبول</button>
-                  <button class="btn btn-primary btn-sm" onclick="adminRejectPublisher('${p.id}','${p.user_id}')">رفض</button>
-                ` : ''}
-                <button class="btn btn-ghost btn-sm" onclick="navigate('team','${p.team_slug}')">عرض</button>
-              </td>
-            </tr>
-          `).join('')}
-        </tbody>
-      </table>
+  if (!data?.length) { wrap.innerHTML = '<div class="empty-state"><div class="empty-state-icon">👥</div><p>لا توجد طلبات</p></div>'; return; }
+  wrap.innerHTML = data.map(p => `
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius2);padding:20px;margin-bottom:12px">
+      <div style="display:flex;gap:16px;flex-wrap:wrap">
+        <!-- لوغو + بانر -->
+        <div style="flex-shrink:0">
+          ${p.logo_url ? `<img src="${p.logo_url}" style="width:72px;height:72px;border-radius:var(--radius);object-fit:cover;border:1px solid var(--border)">` :
+            `<div style="width:72px;height:72px;border-radius:var(--radius);background:var(--accent-dim);display:flex;align-items:center;justify-content:center;font-size:1.8rem;font-weight:900;color:var(--accent)">${p.team_name[0]}</div>`}
+        </div>
+        <!-- التفاصيل -->
+        <div style="flex:1;min-width:220px">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap">
+            <span style="font-size:1.1rem;font-weight:700">${p.team_name}</span>
+            <span class="status-badge status-${p.status}">${p.status === 'pending' ? '⏳ قيد المراجعة' : p.status === 'approved' ? '✓ موافق' : '✗ مرفوض'}</span>
+          </div>
+          <div style="color:var(--text3);font-size:0.82rem;margin-bottom:8px">
+            👤 ${p.users?.username || '—'} &nbsp;|&nbsp; 📧 ${p.users?.email || '—'} &nbsp;|&nbsp; 📅 ${new Date(p.created_at).toLocaleDateString('ar-MA')}
+          </div>
+          ${p.description ? `<div style="font-size:0.85rem;color:var(--text2);margin-bottom:8px;line-height:1.6">${p.description}</div>` : ''}
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:6px;margin-bottom:8px">
+            <div style="background:var(--card2);padding:6px 10px;border-radius:var(--radius);font-size:0.8rem">
+              📅 فصول/أسبوع: <strong>${p.weekly_chapters || 0}</strong>
+            </div>
+            <div style="background:var(--card2);padding:6px 10px;border-radius:var(--radius);font-size:0.8rem">
+              👥 أعضاء: <strong>${p.team_members || 1}</strong>
+            </div>
+          </div>
+          <!-- روابط التواصل -->
+          <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px">
+            ${p.tiktok_url ? `<a href="${p.tiktok_url}" target="_blank" style="font-size:0.75rem;padding:3px 8px;background:var(--card2);border-radius:4px;color:var(--text2)">TikTok</a>` : ''}
+            ${p.facebook_url ? `<a href="${p.facebook_url}" target="_blank" style="font-size:0.75rem;padding:3px 8px;background:var(--card2);border-radius:4px;color:var(--text2)">Facebook</a>` : ''}
+            ${p.discord_url ? `<a href="${p.discord_url}" target="_blank" style="font-size:0.75rem;padding:3px 8px;background:var(--card2);border-radius:4px;color:var(--text2)">Discord</a>` : ''}
+            ${p.youtube_url ? `<a href="${p.youtube_url}" target="_blank" style="font-size:0.75rem;padding:3px 8px;background:var(--card2);border-radius:4px;color:var(--text2)">YouTube</a>` : ''}
+            ${p.website_url ? `<a href="${p.website_url}" target="_blank" style="font-size:0.75rem;padding:3px 8px;background:var(--card2);border-radius:4px;color:var(--text2)">الموقع</a>` : ''}
+          </div>
+          ${p.other_sites?.length ? `<div style="font-size:0.8rem;color:var(--text3)">مواقع أخرى: ${p.other_sites.join(', ')}</div>` : ''}
+          ${p.rejection_reason ? `<div style="font-size:0.82rem;color:var(--danger);margin-top:6px">سبب الرفض: ${p.rejection_reason}</div>` : ''}
+        </div>
+        ${p.banner_url ? `<img src="${p.banner_url}" style="width:100%;height:80px;object-fit:cover;border-radius:var(--radius);margin-top:8px;border:1px solid var(--border)">` : ''}
+      </div>
+      <div style="display:flex;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border);flex-wrap:wrap">
+        ${p.status === 'pending' ? `
+          <button class="btn btn-success btn-sm" onclick="adminApprovePublisher('${p.id}','${p.user_id}')">✓ قبول</button>
+          <button class="btn btn-sm" style="background:var(--danger);color:#fff" onclick="adminRejectPublisher('${p.id}','${p.user_id}')">✗ رفض</button>
+        ` : ''}
+        ${p.status === 'approved' ? `<button class="btn btn-ghost btn-sm" onclick="navigate('team','${p.team_slug}')">عرض الصفحة</button>` : ''}
+      </div>
     </div>
-  `;
+  `).join('');
 }
 
 async function adminApprovePublisher(pubId, userId) {
@@ -3054,30 +3187,53 @@ async function loadAdminTickets() {
   const wrap = document.getElementById('admin-tickets');
   wrap.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
   const { data } = await sb.from('payment_tickets').select('*,users(username,email)').order('created_at', {ascending:false});
-  wrap.innerHTML = `
-    <div class="data-table-wrap">
-      <table class="data-table">
-        <thead><tr><th>المستخدم</th><th>المبلغ</th><th>النقاط</th><th>الحالة</th><th>الصورة</th><th>إجراءات</th></tr></thead>
-        <tbody>
-          ${data?.map(t => `
-            <tr>
-              <td>${t.users?.username || ''}</td>
-              <td>${t.amount_usd}$</td>
-              <td>${t.points_requested}</td>
-              <td><span class="status-badge status-${t.status}">${t.status === 'pending' ? 'قيد المراجعة' : t.status === 'approved' ? 'موافق' : 'مرفوض'}</span></td>
-              <td><a href="${t.screenshot_url}" target="_blank" style="color:var(--accent)">عرض</a></td>
-              <td>
-                ${t.status === 'pending' ? `
-                  <button class="btn btn-success btn-sm" onclick="adminApproveTicket('${t.id}')">قبول</button>
-                  <button class="btn btn-primary btn-sm" onclick="adminRejectTicket('${t.id}')">رفض</button>
-                ` : '—'}
-              </td>
-            </tr>
-          `).join('')}
-        </tbody>
-      </table>
+  if (!data?.length) { wrap.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🎫</div><p>لا توجد تذاكر</p></div>'; return; }
+  wrap.innerHTML = data.map(t => `
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius2);padding:20px;margin-bottom:12px">
+      <div style="display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap">
+        <!-- صورة الدفع -->
+        <div style="flex-shrink:0">
+          ${t.screenshot_url ? `
+            <a href="${t.screenshot_url}" target="_blank">
+              <img src="${t.screenshot_url}" alt="لقطة الدفع"
+                style="width:120px;height:90px;object-fit:cover;border-radius:var(--radius);border:1px solid var(--border);cursor:zoom-in">
+            </a>
+          ` : '<div style="width:120px;height:90px;background:var(--card2);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:0.75rem">لا صورة</div>'}
+        </div>
+        <!-- التفاصيل -->
+        <div style="flex:1;min-width:200px">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">
+            <span style="font-weight:700">${t.users?.username || 'مجهول'}</span>
+            <span style="color:var(--text3);font-size:0.78rem">${t.users?.email || ''}</span>
+            <span class="status-badge status-${t.status}" style="margin-right:auto">${t.status === 'pending' ? '⏳ قيد المراجعة' : t.status === 'approved' ? '✓ موافق' : '✗ مرفوض'}</span>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin-bottom:12px">
+            <div style="background:var(--card2);border-radius:var(--radius);padding:8px;text-align:center">
+              <div style="font-size:1.1rem;font-weight:700;color:var(--accent)">${t.amount_usd}$</div>
+              <div style="font-size:0.72rem;color:var(--text3)">المبلغ المدفوع</div>
+            </div>
+            <div style="background:var(--card2);border-radius:var(--radius);padding:8px;text-align:center">
+              <div style="font-size:1.1rem;font-weight:700;color:var(--warning)">${t.points_requested}</div>
+              <div style="font-size:0.72rem;color:var(--text3)">النقاط المطلوبة</div>
+            </div>
+            <div style="background:var(--card2);border-radius:var(--radius);padding:8px;text-align:center">
+              <div style="font-size:0.85rem;font-weight:600">${new Date(t.created_at).toLocaleDateString('ar-MA')}</div>
+              <div style="font-size:0.72rem;color:var(--text3)">تاريخ الطلب</div>
+            </div>
+          </div>
+          ${t.contact_method ? `<div style="font-size:0.82rem;color:var(--text2);margin-bottom:4px">📞 التواصل: <strong>${t.contact_method}</strong></div>` : ''}
+          ${t.notes ? `<div style="font-size:0.82rem;color:var(--text2);background:var(--card2);padding:8px;border-radius:var(--radius)">📝 ${t.notes}</div>` : ''}
+          ${t.rejection_reason ? `<div style="font-size:0.82rem;color:var(--danger);margin-top:6px">سبب الرفض: ${t.rejection_reason}</div>` : ''}
+        </div>
+      </div>
+      ${t.status === 'pending' ? `
+        <div style="display:flex;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
+          <button class="btn btn-success" onclick="adminApproveTicket('${t.id}')">✓ قبول وإضافة ${t.points_requested} نقطة</button>
+          <button class="btn" style="background:var(--danger);color:#fff" onclick="adminRejectTicket('${t.id}')">✗ رفض</button>
+        </div>
+      ` : ''}
     </div>
-  `;
+  `).join('');
 }
 
 async function adminApproveTicket(ticketId) {
@@ -3210,32 +3366,70 @@ async function loadAdminSettings() {
   settings?.forEach(s => settingMap[s.key] = s.value);
 
   wrap.innerHTML = `
-    <div style="display:grid;gap:16px;max-width:600px">
-      <div class="form-group">
-        <label class="form-label">فتح تسجيل الناشرين</label>
-        <select class="form-input" id="setting-pub-reg" onchange="adminUpdateSetting('publisher_registration_open',this.value)">
-          <option value="true" ${settingMap.publisher_registration_open === 'true' ? 'selected' : ''}>مفتوح</option>
-          <option value="false" ${settingMap.publisher_registration_open !== 'true' ? 'selected' : ''}>مغلق</option>
-        </select>
+    <div style="display:grid;gap:20px;max-width:720px">
+
+      <!-- الإعدادات العامة -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius2);padding:20px">
+        <h3 style="font-size:0.95rem;font-weight:700;margin-bottom:16px;color:var(--accent)">⚙️ الإعدادات العامة</h3>
+        <div class="form-group">
+          <label class="form-label">فتح تسجيل الناشرين</label>
+          <select class="form-input" onchange="adminUpdateSetting('publisher_registration_open',this.value)">
+            <option value="true" ${settingMap.publisher_registration_open === 'true' ? 'selected' : ''}>مفتوح</option>
+            <option value="false" ${settingMap.publisher_registration_open !== 'true' ? 'selected' : ''}>مغلق</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">عمولة المنصة %</label>
+          <input class="form-input" type="number" value="${settingMap.platform_commission || 20}" onchange="adminUpdateSetting('platform_commission',this.value)">
+        </div>
+        <div class="form-group">
+          <label class="form-label">وقت انتظار التعليق (ثانية)</label>
+          <input class="form-input" type="number" value="${settingMap.comment_cooldown_seconds || 40}" onchange="adminUpdateSetting('comment_cooldown_seconds',this.value)">
+        </div>
+        <div class="form-group">
+          <label class="form-label">عنوان USDT TRC20</label>
+          <input class="form-input" type="text" value="${settingMap.usdt_address || USDT_ADDRESS}" onchange="adminUpdateSetting('usdt_address',this.value)">
+        </div>
       </div>
-      <div class="form-group">
-        <label class="form-label">عمولة المنصة %</label>
-        <input class="form-input" type="number" id="setting-commission" value="${settingMap.platform_commission || 20}" onchange="adminUpdateSetting('platform_commission',this.value)">
+
+      <!-- إدارة الإعلانات -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius2);padding:20px">
+        <h3 style="font-size:0.95rem;font-weight:700;margin-bottom:4px;color:var(--accent)">📢 إدارة الإعلانات</h3>
+        <p style="font-size:0.8rem;color:var(--text3);margin-bottom:16px">الصق كود الإعلان (script أو iframe) في الحقل المناسب — سيظهر تلقائياً في موضعه</p>
+        ${[
+          {key:'ad_top_banner', label:'بانر أعلى الصفحة الرئيسية'},
+          {key:'ad_mid_1', label:'إعلان بين السلايدر وأحدث الفصول'},
+          {key:'ad_mid_2', label:'إعلان بين الفصول والشائع'},
+          {key:'ad_bottom', label:'بانر أسفل الصفحة الرئيسية'},
+          {key:'ad_browse_sidebar', label:'إعلان جانبي صفحة التصفح'},
+          {key:'ad_manga_top', label:'إعلان أعلى صفحة العمل'},
+          {key:'ad_manga_chapters', label:'إعلان فوق قائمة الفصول'},
+          {key:'ad_reader_top', label:'إعلان أعلى صفحة القراءة'},
+          {key:'ad_reader_bottom', label:'إعلان أسفل صفحة القراءة'},
+          {key:'ad_reader_between', label:'إعلان بين صفحات القراءة (كل 5 صفحات)'},
+          {key:'ad_before_comments', label:'إعلان قبل التعليقات'},
+          {key:'ad_search', label:'إعلان صفحة البحث'},
+        ].map(ad => `
+          <div class="form-group">
+            <label class="form-label" style="display:flex;align-items:center;justify-content:space-between">
+              <span>${ad.label}</span>
+              <span style="font-size:0.7rem;color:var(--text3);font-family:monospace">${ad.key}</span>
+            </label>
+            <textarea class="form-input" rows="2" placeholder="الصق كود الإعلان هنا..." onchange="adminUpdateSetting('${ad.key}',this.value)" style="font-family:monospace;font-size:0.78rem">${settingMap[ad.key] || ''}</textarea>
+          </div>
+        `).join('')}
       </div>
-      <div class="form-group">
-        <label class="form-label">وقت انتظار التعليق (ثانية)</label>
-        <input class="form-input" type="number" id="setting-cooldown" value="${settingMap.comment_cooldown_seconds || 40}" onchange="adminUpdateSetting('comment_cooldown_seconds',this.value)">
+
+      <!-- إشعارات جماعية -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius2);padding:20px">
+        <h3 style="font-size:0.95rem;font-weight:700;margin-bottom:16px;color:var(--accent)">🔔 إشعار جماعي</h3>
+        <div class="form-group">
+          <input class="form-input" id="notif-title" placeholder="عنوان الإشعار" style="margin-bottom:8px">
+          <textarea class="form-input" id="notif-msg" rows="2" placeholder="نص الإشعار..."></textarea>
+        </div>
+        <button class="btn btn-primary" onclick="adminSendGlobalNotif()">📣 إرسال للجميع</button>
       </div>
-      <div class="form-group">
-        <label class="form-label">عنوان USDT TRC20</label>
-        <input class="form-input" type="text" id="setting-usdt" value="${settingMap.usdt_address || ''}" onchange="adminUpdateSetting('usdt_address',this.value)">
-      </div>
-      <div class="form-group">
-        <label class="form-label">إرسال إشعار لجميع المستخدمين</label>
-        <input class="form-input" id="notif-title" placeholder="عنوان الإشعار" style="margin-bottom:8px">
-        <textarea class="form-input" id="notif-msg" rows="2" placeholder="نص الإشعار"></textarea>
-        <button class="btn btn-primary" style="margin-top:8px" onclick="adminSendGlobalNotif()">إرسال للجميع</button>
-      </div>
+
     </div>
   `;
 }
@@ -3260,80 +3454,142 @@ async function adminSendGlobalNotif() {
 async function loadAdminStats() {
   const wrap = document.getElementById('admin-stats');
   wrap.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+
   const [
     {count: usersCount},
     {count: mangaCount},
+    {count: mangaPending},
     {count: chaptersCount},
-    {count: ticketsPending}
+    {count: ticketsPending},
+    {count: publishersCount},
+    {count: commentsCount}
   ] = await Promise.all([
-    sb.from('users').select('*', {count:'exact',head:true}),
-    sb.from('manga').select('*', {count:'exact',head:true}).eq('approval_status','approved'),
-    sb.from('chapters').select('*', {count:'exact',head:true}),
-    sb.from('payment_tickets').select('*', {count:'exact',head:true}).eq('status','pending')
+    sb.from('users').select('*',{count:'exact',head:true}),
+    sb.from('manga').select('*',{count:'exact',head:true}).eq('approval_status','approved'),
+    sb.from('manga').select('*',{count:'exact',head:true}).eq('approval_status','pending'),
+    sb.from('chapters').select('*',{count:'exact',head:true}),
+    sb.from('payment_tickets').select('*',{count:'exact',head:true}).eq('status','pending'),
+    sb.from('publishers').select('*',{count:'exact',head:true}).eq('status','approved'),
+    sb.from('comments').select('*',{count:'exact',head:true}).eq('is_deleted',false)
   ]);
 
-  const { data: pointsData } = await sb.from('points_transactions').select('amount').eq('type','purchase');
-  const totalPurchased = pointsData?.reduce((s,t) => s + Math.max(t.amount, 0), 0) || 0;
+  const { data: purchaseData } = await sb.from('points_transactions').select('amount').eq('type','purchase');
+  const { data: spendData } = await sb.from('points_transactions').select('amount').eq('type','spend');
+  const { data: donationData } = await sb.from('points_transactions').select('amount').eq('type','donate');
+  const totalPurchased = purchaseData?.reduce((s,t) => s + Math.max(t.amount,0), 0) || 0;
+  const totalSpent = spendData?.reduce((s,t) => s + Math.abs(t.amount), 0) || 0;
+  const totalDonated = donationData?.reduce((s,t) => s + Math.abs(t.amount), 0) || 0;
+  const platformEarnings = ((totalPurchased / 100) * 0.2).toFixed(2);
 
-  wrap.innerHTML = `
-    <div class="stats-grid">
-      <div class="stat-card"><div class="stat-value">${usersCount || 0}</div><div class="stat-label">إجمالي المستخدمين</div></div>
-      <div class="stat-card"><div class="stat-value">${mangaCount || 0}</div><div class="stat-label">الأعمال المنشورة</div></div>
-      <div class="stat-card"><div class="stat-value">${chaptersCount || 0}</div><div class="stat-label">إجمالي الفصول</div></div>
-      <div class="stat-card"><div class="stat-value">${ticketsPending || 0}</div><div class="stat-label">طلبات دفع معلقة</div></div>
-      <div class="stat-card"><div class="stat-value">${formatNum(totalPurchased)}</div><div class="stat-label">نقاط مشتراة</div></div>
-      <div class="stat-card"><div class="stat-value">${((totalPurchased / 100) * 0.2).toFixed(2)}$</div><div class="stat-label">أرباح المنصة (تقديرية)</div></div>
+  // جلب آخر 7 أيام مستخدمين
+  const week = new Date(Date.now() - 7*24*60*60*1000).toISOString();
+  const { count: newUsers } = await sb.from('users').select('*',{count:'exact',head:true}).gte('created_at', week);
+
+  wrap.innerHTML = \`
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:24px">
+      \${[
+        {icon:'👥', val: formatNum(usersCount||0), label:'المستخدمون', sub:'+'+newUsers+' هذا الأسبوع', color:'var(--accent)'},
+        {icon:'📚', val: formatNum(mangaCount||0), label:'أعمال منشورة', sub: mangaPending+' قيد المراجعة', color:'var(--success)'},
+        {icon:'📖', val: formatNum(chaptersCount||0), label:'إجمالي الفصول', sub:'', color:'var(--info)'},
+        {icon:'🏢', val: publishersCount||0, label:'ناشرون معتمدون', sub:'', color:'var(--warning)'},
+        {icon:'💬', val: formatNum(commentsCount||0), label:'التعليقات', sub:'', color:'#ec4899'},
+        {icon:'🎫', val: ticketsPending||0, label:'تذاكر معلقة', sub:'تحتاج مراجعة', color: ticketsPending > 0 ? 'var(--danger)' : 'var(--text3)'},
+        {icon:'💎', val: formatNum(totalPurchased), label:'نقاط مشتراة', sub:(totalPurchased/100).toFixed(0)+'$', color:'var(--accent)'},
+        {icon:'💰', val: platformEarnings+'$', label:'أرباح المنصة', sub:'عمولة 20%', color:'var(--success)'},
+      ].map(s => \`
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius2);padding:16px;text-align:center">
+          <div style="font-size:1.8rem;margin-bottom:4px">\${s.icon}</div>
+          <div style="font-size:1.5rem;font-weight:900;color:\${s.color}">\${s.val}</div>
+          <div style="font-size:0.78rem;color:var(--text3);margin-top:2px">\${s.label}</div>
+          \${s.sub ? \`<div style="font-size:0.7rem;color:var(--text3);margin-top:2px">\${s.sub}</div>\` : ''}
+        </div>
+      \`).join('')}
     </div>
-  `;
+
+    <!-- مخطط النقاط -->
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius2);padding:20px;margin-bottom:16px">
+      <h3 style="font-size:0.9rem;font-weight:700;margin-bottom:16px">💹 نشاط النقاط</h3>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+        <div style="background:var(--card2);border-radius:var(--radius);padding:12px;text-align:center;border:1px solid rgba(124,58,237,0.3)">
+          <div style="font-size:1.2rem;font-weight:700;color:var(--accent)">\${formatNum(totalPurchased)}</div>
+          <div style="font-size:0.75rem;color:var(--text3)">نقاط مشتراة</div>
+        </div>
+        <div style="background:var(--card2);border-radius:var(--radius);padding:12px;text-align:center;border:1px solid rgba(239,68,68,0.3)">
+          <div style="font-size:1.2rem;font-weight:700;color:var(--danger)">\${formatNum(totalSpent)}</div>
+          <div style="font-size:0.75rem;color:var(--text3)">نقاط مُنفَقة</div>
+        </div>
+        <div style="background:var(--card2);border-radius:var(--radius);padding:12px;text-align:center;border:1px solid rgba(245,158,11,0.3)">
+          <div style="font-size:1.2rem;font-weight:700;color:var(--warning)">\${formatNum(totalDonated)}</div>
+          <div style="font-size:0.75rem;color:var(--text3)">نقاط تبرعات</div>
+        </div>
+      </div>
+    </div>
+  \`;
 }
 
-// =================== R2 UPLOAD ===================
+// =================== FILE UPLOAD ===================
 async function uploadToR2(file, key) {
   try {
-    const url = `${R2_ENDPOINT}/${R2_BUCKET}/${key}`;
-    const now = new Date();
-    const dateStr = now.toISOString().slice(0,10).replace(/-/g,'');
-    const region = 'auto';
-    const service = 's3';
-    const algorithm = 'AWS4-HMAC-SHA256';
-    const credential = `${R2_KEY_ID}/${dateStr}/${region}/${service}/aws4_request`;
-    const expires = '86400';
-    const signedHeaders = 'host';
-    const host = new URL(url).host;
-    const amzDate = now.toISOString().replace(/[:-]|\.\d{3}/g,'');
-
-    // Use simple presigned URL approach via Supabase edge or direct PUT
-    // For now, using direct PUT with auth headers (works with R2 S3 API)
-    const response = await fetch(`${R2_ENDPOINT}/${R2_BUCKET}/${key}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': file.type || 'image/jpeg',
-        'x-amz-date': amzDate,
-        'Authorization': `AWS ${R2_KEY_ID}:${await generateSimpleSignature(R2_KEY_SECRET, file)}`,
-      },
-      body: file
+    // أولاً: Supabase Storage
+    const bucket = key.startsWith('covers/') ? 'manga-covers'
+      : key.startsWith('chapters/') ? 'chapter-pages'
+      : key.startsWith('teams/') ? 'team-assets'
+      : 'payment-screenshots';
+    const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+    const storageKey = key.replace(/\.jpg$/, '.' + ext);
+    const { data, error } = await sb.storage.from(bucket).upload(storageKey, file, {
+      cacheControl: '3600', upsert: true, contentType: file.type || 'image/jpeg'
     });
-
-    if (response.ok || response.status === 200) {
-      return `${R2_PUBLIC}/${key}`;
+    if (!error) {
+      const { data: pub } = sb.storage.from(bucket).getPublicUrl(storageKey);
+      return pub.publicUrl;
     }
+    console.warn('Supabase Storage error, trying R2:', error.message);
+  } catch(e) { console.warn('Storage fallback to R2:', e); }
 
-    // Fallback: try without auth (public bucket)
-    const r2 = await fetch(`${R2_PUBLIC}/${key}`, {method:'HEAD'});
-    return `${R2_PUBLIC}/${key}`;
-  } catch(e) {
-    console.error('Upload error:', e);
-    // Return a placeholder if upload fails in development
-    return `${R2_PUBLIC}/${key}`;
-  }
+  // ثانياً: R2 بـ AWS Signature V4
+  try {
+    const encoder = new TextEncoder();
+    const now = new Date();
+    const amzDate = now.toISOString().replace(/[:\-]|\.\d{3}/g,'');
+    const dateStamp = amzDate.slice(0,8);
+    const uploadUrl = R2_ENDPOINT + '/' + R2_BUCKET + '/' + key;
+    const host = new URL(uploadUrl).host;
+    const ct = file.type || 'image/jpeg';
+    const buf = await file.arrayBuffer();
+
+    const sha256hex = async (data) => {
+      const b = typeof data === 'string' ? encoder.encode(data) : data;
+      return Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',b))).map(x=>x.toString(16).padStart(2,'0')).join('');
+    };
+    const hmac = async (key, msg) => {
+      const k = key instanceof Uint8Array ? key : encoder.encode(key);
+      const ck = await crypto.subtle.importKey('raw',k,{name:'HMAC',hash:'SHA-256'},false,['sign']);
+      return new Uint8Array(await crypto.subtle.sign('HMAC',ck,encoder.encode(msg)));
+    };
+    const hexArr = b => Array.from(b).map(x=>x.toString(16).padStart(2,'0')).join('');
+
+    const payloadHash = await sha256hex(new Uint8Array(buf));
+    const canonHeaders = 'content-type:'+ct+'\nhost:'+host+'\nx-amz-content-sha256:'+payloadHash+'\nx-amz-date:'+amzDate+'\n';
+    const signedHdrs = 'content-type;host;x-amz-content-sha256;x-amz-date';
+    const canonReq = ['PUT','/'+R2_BUCKET+'/'+key,'',canonHeaders,signedHdrs,payloadHash].join('\n');
+    const credScope = dateStamp+'/auto/s3/aws4_request';
+    const sts = ['AWS4-HMAC-SHA256',amzDate,credScope,await sha256hex(canonReq)].join('\n');
+    const sigKey = await hmac(await hmac(await hmac(await hmac('AWS4'+R2_KEY_SECRET,dateStamp),'auto'),'s3'),'aws4_request');
+    const sig = hexArr(await hmac(sigKey,sts));
+    const auth = 'AWS4-HMAC-SHA256 Credential='+R2_KEY_ID+'/'+credScope+', SignedHeaders='+signedHdrs+', Signature='+sig;
+
+    const resp = await fetch(uploadUrl, {
+      method:'PUT',
+      headers:{'Authorization':auth,'Content-Type':ct,'x-amz-date':amzDate,'x-amz-content-sha256':payloadHash},
+      body: buf
+    });
+    if (resp.ok) return R2_PUBLIC + '/' + key;
+    console.error('R2 error:', resp.status, await resp.text().catch(()=>''));
+    return null;
+  } catch(e) { console.error('R2 upload failed:', e); return null; }
 }
 
-// Simple helper (actual HMAC signing requires a library; use Supabase edge function in production)
-async function generateSimpleSignature(secret, file) {
-  return btoa(secret + ':' + file.name + ':' + Date.now()).slice(0,20);
-}
-
-// =================== MODAL ===================
 function openModal(title, bodyHtml, actions = []) {
   document.getElementById('modal-title').textContent = title;
   document.getElementById('modal-body').innerHTML = bodyHtml;
