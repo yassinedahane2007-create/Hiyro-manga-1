@@ -2327,8 +2327,8 @@ transition:right var(--transition);
 
 <script>
 // ===== CONFIG =====
-const SUPABASE_URL = 'https://entkbbifxmmdbpbmcxkr.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_InTjgBx8HXbTAWpwGmYgrg_DtnUHPlu';
+const SUPABASE_URL = 'https://jrnaqahscnfetkcgwkwp.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_fCJdH-_093A3Ax7fUwAPfg_73TFUwxe';
 const R2_PUBLIC_URL = 'https://pub-a8771e28b92448fdb9284f56f8f00aac.r2.dev';
 const R2_ENDPOINT = 'https://a771b1702ddecaf43c60fd6e52be7131.r2.cloudflarestorage.com';
 const R2_ACCESS_KEY = 'b8907c1d7948b6bc73d1031dfcd40316';
@@ -2465,10 +2465,28 @@ async function register() {
   if (!username || !email || !pass) { errEl.textContent = 'يرجى ملء جميع الحقول'; errEl.classList.remove('hidden'); return; }
   if (pass.length < 8) { errEl.textContent = 'كلمة المرور يجب أن تكون 8 أحرف على الأقل'; errEl.classList.remove('hidden'); return; }
   showLoading('جاري إنشاء الحساب...');
-  const { error } = await sb.auth.signUp({ email, password: pass, options: { data: { username } } });
+  const { data: signUpData, error } = await sb.auth.signUp({ email, password: pass, options: { data: { username }, emailRedirectTo: null } });
+  if (!error && signUpData?.user) {
+    const existing = await sb.from('users').select('id').eq('id', signUpData.user.id).single();
+    if (!existing.data) {
+      await sb.from('users').insert({ id: signUpData.user.id, email, username });
+    }
+  }
   hideLoading();
-  if (error) { errEl.textContent = error.message; errEl.classList.remove('hidden'); }
-  else { errEl.classList.add('hidden'); showToast('تم إنشاء الحساب! تحقق من بريدك الإلكتروني', 'success'); }
+  if (error) {
+    let msg = 'حدث خطأ، حاول مرة أخرى';
+    if (error.message) {
+      if (error.message.includes('already registered') || error.message.includes('already been registered')) msg = 'هذا البريد الإلكتروني مسجل مسبقاً';
+      else if (error.message.includes('invalid email') || error.message.includes('Invalid email')) msg = 'البريد الإلكتروني غير صحيح';
+      else if (error.message.includes('Password') || error.message.includes('password')) msg = 'كلمة المرور ضعيفة جداً';
+      else if (error.message.includes('rate limit') || error.message.includes('too many')) msg = 'محاولات كثيرة، انتظر قليلاً';
+      else if (error.message.includes('network') || error.message.includes('fetch')) msg = 'خطأ في الاتصال، تحقق من الإنترنت';
+      else msg = error.message;
+    }
+    errEl.textContent = msg;
+    errEl.classList.remove('hidden');
+  }
+  else { errEl.classList.add('hidden'); showToast('تم إنشاء الحساب! يمكنك تسجيل الدخول الآن', 'success'); closeModal('modal-auth'); }
 }
 
 async function logout() {
