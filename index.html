@@ -1372,11 +1372,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   loadGenreFilters();
-  // hashchange listener
-  window.addEventListener('hashchange', routeFromHash);
   window.addEventListener('scroll', updateReaderProgress);
-  // route الصفحة الحالية - مع تأخير بسيط لضمان تحميل الـ DOM كاملاً
-  setTimeout(routeFromHash, 0);
+  // popstate للـ back/forward button
+  window.addEventListener('popstate', routeFromHash);
+  // بدء من الصفحة الرئيسية دائماً
+  navigate('home');
   document.addEventListener('click', (e) => {
     if (notifOpen && !e.target.closest('#notif-panel-wrap') && !e.target.closest('[onclick*="toggleNotif"]')) {
       closeNotifPanel();
@@ -1386,34 +1386,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // =================== ROUTING ===================
 function routeFromHash() {
-  const raw = location.hash.replace(/^#\/?/, '') || 'home';
-  const parts = raw.split('/');
-  _doNavigate(parts[0], parts[1], parts[2]);
+  // مدعوم للـ back button فقط
+  const raw = (location.hash || '#home').replace(/^#\/?/, '') || 'home';
+  const parts = raw.split('/').filter(Boolean);
+  navigate(parts[0] || 'home', parts[1], parts[2]);
 }
 
-// navigate: يغير الـ hash أو ينفذ مباشرة
+// navigate: مباشر - يُغيّر الصفحة فوراً بدون hash
 function navigate(page, param1, param2) {
-  let hashVal = page;
-  if (param1) hashVal += '/' + param1;
-  if (param2) hashVal += '/' + param2;
-  const newHash = '#' + hashVal;
-  const curHash = location.hash || '#home';
-  if (curHash === newHash || curHash === newHash + '/') {
-    // نفس الصفحة - نفذ مباشرة
-    _doNavigate(page, param1, param2);
-  } else {
-    location.hash = newHash;
-    // بعض المتصفحات لا تُطلق hashchange فوراً
-    setTimeout(() => {
-      if ((location.hash || '#home') === newHash) {
-        _doNavigate(page, param1, param2);
-      }
-    }, 50);
-  }
-}
-
-// _doNavigate: التنفيذ الفعلي بعد تغيير الـ hash
-function _doNavigate(page, param1, param2) {
   // حماية الصفحات المقيدة
   if ((page === 'admin' || page === 'publisher') && !currentUser) {
     page = 'auth'; param1 = undefined; param2 = undefined;
@@ -1421,6 +1401,12 @@ function _doNavigate(page, param1, param2) {
   if (page === 'auth' && currentUser) {
     page = 'home'; param1 = undefined; param2 = undefined;
   }
+
+  // تحديث history بدون إعادة تحميل
+  try {
+    const hashVal = param2 ? page+'/'+param1+'/'+param2 : param1 ? page+'/'+param1 : page;
+    history.replaceState(null, '', '#' + hashVal);
+  } catch(e) {}
 
   // إظهار الصفحة الصحيحة
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
