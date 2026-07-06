@@ -1289,21 +1289,25 @@ async function doRegister() {
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { showErr(errEl, 'البريد الإلكتروني غير صحيح'); return; }
   showLoad('جاري إنشاء الحساب...');
   const { data: signData, error } = await sb.auth.signUp({ email, password: pass, options: { data: { username: uname } } });
-  if (!error && signData?.user) {
-    try { await sb.from('users').upsert({ id: signData.user.id, email, username: uname }, { onConflict: 'id' }); } catch(e){}
-  }
   hideLoad();
   if (error) {
-    const msg = error.message || '';
-    if (msg.includes('already') || msg.includes('registered')) showErr(errEl, 'هذا البريد مسجل مسبقاً، جرب تسجيل الدخول');
-    else if (msg.includes('invalid') || msg.includes('Invalid')) showErr(errEl, 'البريد الإلكتروني غير صحيح');
-    else if (msg.includes('weak') || msg.includes('Password')) showErr(errEl, 'كلمة المرور ضعيفة جداً');
-    else if (msg.includes('rate') || msg.includes('many')) showErr(errEl, 'محاولات كثيرة، انتظر دقيقة');
-    else showErr(errEl, 'حدث خطأ: ' + msg);
-  } else {
-    hideLoad();
+    const raw = error?.message || error?.error_description || error?.msg || '';
+    const rawStr = typeof raw === 'string' ? raw : JSON.stringify(raw);
+    let msg = 'حدث خطأ في التسجيل، حاول مرة أخرى';
+    if (rawStr.includes('already') || rawStr.includes('registered') || rawStr.includes('unique')) msg = 'هذا البريد مسجل مسبقاً، جرب تسجيل الدخول';
+    else if (rawStr.includes('invalid') || rawStr.includes('Invalid') || rawStr.includes('format')) msg = 'البريد الإلكتروني غير صحيح';
+    else if (rawStr.includes('weak') || rawStr.includes('Password') || rawStr.includes('6 characters')) msg = 'كلمة المرور ضعيفة — استخدم 8 أحرف أو أكثر';
+    else if (rawStr.includes('rate') || rawStr.includes('many') || rawStr.includes('429')) msg = 'محاولات كثيرة، انتظر دقيقة ثم حاول';
+    else if (rawStr.length > 0 && rawStr !== '{}') msg = rawStr;
+    showErr(errEl, msg);
+    return;
+  }
+  if (signData?.user) {
+    try { await sb.from('users').upsert({ id: signData.user.id, email, username: uname }, { onConflict: 'id' }); } catch(e){}
     toast('تم إنشاء الحساب! يمكنك تسجيل الدخول الآن', 'success');
     switchAuthTab('login');
+  } else {
+    showErr(errEl, 'تحقق من بريدك الإلكتروني لتأكيد الحساب');
   }
 }
 
